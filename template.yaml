@@ -1,0 +1,69 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  prueba-piloto-lambda-crud
+
+  SAM Template for prueba-piloto-lambda-crud
+
+Globals:
+  Function:
+    Timeout: 60
+
+Parameters:
+  CrudUsername:
+    Description: Database User Username
+    Type: String
+    Default: ""
+  CrudPass:
+    Type: String
+    Default: ""
+  CrudHost:
+    Type: String
+    Default: ""
+  CrudPort:
+    Type: String
+    Default: ""
+  CrudDB:
+    Type: String
+    Default: "prueba_piloto_lambda_db"
+
+Resources:
+  CreateSyllabusFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/handlers/create_syllabus/
+      Handler: app.lambda_handler
+      Runtime: python3.9
+      Environment:
+        Variables:
+          SYLLABUS_CRUD_HOST: !Ref CrudHost
+          SYLLABUS_CRUD_PORT: !Ref CrudPort
+          SYLLABUS_CRUD_USERNAME: !Ref CrudUsername
+          SYLLABUS_CRUD_PASS: !Ref CrudPass
+          SYLLABUS_CRUD_DB: !Ref CrudDB
+      Events:
+        CreateSyllabus:
+          Type: Api
+          Properties:
+            Path: /syllabus
+            Method: post
+
+  GetSyllabusFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/handlers/get_syllabus/
+      Handler: app.lambda_handler
+      Runtime: python3.9
+      Environment:
+        Variables:
+          SYLLABUS_CRUD_HOST: !Ref CrudHost
+          SYLLABUS_CRUD_PORT: !Ref CrudPort
+          SYLLABUS_CRUD_USERNAME: !Ref CrudUsername
+          SYLLABUS_CRUD_PASS: !Ref CrudPass
+          SYLLABUS_CRUD_DB: !Ref CrudDB
+      Events:
+        GetSyllabus:
+          Type: Api
+          Properties:
+            Path: /syllabus/{id}
+            Method: get
