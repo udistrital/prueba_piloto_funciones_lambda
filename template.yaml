@@ -72,6 +72,26 @@ Resources:
             Path: /syllabus/{id}
             Method: get
 
+  GetAllSyllabusFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/handlers/get_all_syllabus/
+      Handler: app.lambda_handler
+      Runtime: python3.9
+      Environment:
+        Variables:
+          SYLLABUS_CRUD_HOST: !Ref CrudHost
+          SYLLABUS_CRUD_PORT: !Ref CrudPort
+          SYLLABUS_CRUD_USERNAME: !Ref CrudUsername
+          SYLLABUS_CRUD_PASS: !Ref CrudPass
+          SYLLABUS_CRUD_DB: !Ref CrudDB
+      Events:
+        GetSyllabus:
+          Type: Api
+          Properties:
+            Path: /syllabus
+            Method: get
+
   HealthFunction:
     Type: AWS::Serverless::Function
     Properties:
