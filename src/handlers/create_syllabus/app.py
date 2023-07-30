@@ -1,8 +1,11 @@
+# Post syllabus
+
 import json
 import os
-import uuid
-from typing import List, Dict
+from datetime import datetime
+from typing import List, Dict, Optional
 
+import pytz
 from pydantic import BaseModel, Field
 from pymongo import MongoClient
 
@@ -11,12 +14,17 @@ SYLLABUS_CRUD_PORT = os.environ.get('SYLLABUS_CRUD_PORT')
 SYLLABUS_CRUD_USERNAME = os.environ.get('SYLLABUS_CRUD_USERNAME')
 SYLLABUS_CRUD_PASS = os.environ.get('SYLLABUS_CRUD_PASS')
 SYLLABUS_CRUD_DB = os.environ.get('SYLLABUS_CRUD_DB')
+TIMEZONE = os.environ.get('TIMEZONE')
 COLLECTION = "syllabus"
-client: MongoClient
+
+print(SYLLABUS_CRUD_DB)
+
+
+def local_now():
+    return datetime.now(tz=pytz.timezone(TIMEZONE))
 
 
 class SyllabusModel(BaseModel):
-    id: str = Field(default_factory=uuid.uuid4)
     espacio_academico_id: int
     justificacion: str
     objetivo_general: str
@@ -28,6 +36,9 @@ class SyllabusModel(BaseModel):
     evaluacion: Dict
     bibliografia: List
     seguimiento: List
+    activo: bool = Field(default=True)
+    fecha_creacion: datetime = Field(default=local_now())
+    fecha_modificacion: Optional[datetime] = None
 
 
 def connect_db_client():
@@ -38,16 +49,25 @@ def connect_db_client():
                   f"{SYLLABUS_CRUD_HOST}:{SYLLABUS_CRUD_PORT}/"
         else:
             # Without password
-            uri = "mongodb://172.17.0.1:27017/"
-            # uri = f"mongodb://{SYLLABUS_CRUD_HOST}:{SYLLABUS_CRUD_PORT}/{SYLLABUS_CRUD_DB}"
+            uri = f"mongodb://{SYLLABUS_CRUD_HOST}:{SYLLABUS_CRUD_PORT}/"
 
-        client = MongoClient(uri)
-        print("Connection Successful")
+        client = MongoClient(uri, uuidRepresentation='standard')
+        print("Client DB Successful")
         return client
     except Exception as ex:
-        print("Error Connection")
-        print(ex)
+        print("Error Client DB")
+        print(f"Detail: {ex}")
         return None
+
+
+def close_connect_db(client):
+    try:
+        print("Closing client DB")
+        if client:
+            client.close()
+    except Exception as ex:
+        print("Error close Client DB")
+        print(f"Detail: {ex}")
 
 
 def parse_body(event) -> tuple:
@@ -57,16 +77,32 @@ def parse_body(event) -> tuple:
         return None, ex
 
 
-def close_connect_db(client):
-    try:
-        print("Closing connection db")
-        client.close()
-    except Exception as ex:
-        print("Error close connection")
-        print(ex)
+def format_response(result, message: str, status_code: int, success: bool):
+    if isinstance(result, dict):
+        if success:
+            if result.get("_id"):
+                result["_id"] = str(result["_id"])
+            if result.get("fecha_creacion"):
+                result["fecha_creacion"] = str(result["fecha_creacion"])
+
+            return {"statusCode": status_code,
+                    "body": json.dumps({
+                        "Success": success,
+                        "Status": status_code,
+                        "Message": message,
+                        "Data": result
+                    })}
+        else:
+            return {"statusCode": status_code,
+                    "body": json.dumps({
+                        "Success": success,
+                        "Status": status_code,
+                        "Message": message
+                    })}
 
 
 def lambda_handler(event, context):
+    client = None
     try:
         data, error = parse_body(event)
         if error is None:
@@ -74,24 +110,33 @@ def lambda_handler(event, context):
             syllabus_data = SyllabusModel(**data).__dict__
             client = connect_db_client()
             if client:
-                print(SYLLABUS_CRUD_DB)
-            syllabus_collection = client[str(SYLLABUS_CRUD_DB)]["syllabus"]
-            print("Syllabus data", syllabus_data)
-            result = syllabus_collection.insert_one(syllabus_data)
-            if result:
-                new_syllabus_id = result.inserted_id
-                new_syllabus = syllabus_collection.find_one(new_syllabus_id)
-                new_syllabus["_id"] = str(new_syllabus["_id"])
-                return {"statusCode": 201,
-                        "body": json.dumps({
-                            "message": "Created!",
-                            "data": SyllabusModel(**new_syllabus).__dict__
-                        })}
-            else:
-                return {"statusCode": 400,
-                        "body": json.dumps({"message": "Error registering new syllabus!"})}
+                print("Connecting database ...")
+                syllabus_collection = client[str(SYLLABUS_CRUD_DB)]["syllabus"]
+                print("Connection database successful")
+                print("Inserting new syllabus")
+                result = syllabus_collection.insert_one(syllabus_data)
+                print("Created new syllabus")
+                if result:
+                    new_syllabus_id = result.inserted_id
+                    new_syllabus = syllabus_collection.find_one(new_syllabus_id)
+                    return format_response(
+                        new_syllabus,
+                        "Created syllabus",
+                        201,
+                        True)
+                else:
+                    close_connect_db(client)
+            return format_response(
+                {},
+                "Error registering new syllabus!",
+                403,
+                False)
     except Exception as ex:
         print("Error creating register syllabus")
-        print(ex)
-        if client:
-            close_connect_db(client)
+        print(f"Detail: {ex}")
+        close_connect_db(client)
+        return format_response(
+            {},
+            "Error registering new syllabus!",
+            403,
+            False)

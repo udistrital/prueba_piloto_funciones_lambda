@@ -8,6 +8,7 @@ pydantic-core==2.4.0
 pymongo==4.4.1
 pymongo-auth-aws==1.1.0
 python-dateutil==2.8.2
+pytz==2023.3
 s3transfer==0.6.1
 six==1.16.0
 typing-extensions==4.7.1

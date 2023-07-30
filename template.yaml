@@ -26,6 +26,9 @@ Parameters:
   CrudDB:
     Type: String
     Default: "prueba_piloto_lambda_db"
+  Timezone:
+    Type: String
+    Default: "America/Bogota"
 
 Resources:
   CreateSyllabusFunction:
@@ -41,6 +44,7 @@ Resources:
           SYLLABUS_CRUD_USERNAME: !Ref CrudUsername
           SYLLABUS_CRUD_PASS: !Ref CrudPass
           SYLLABUS_CRUD_DB: !Ref CrudDB
+          TIMEZONE: !Ref Timezone
       Events:
         CreateSyllabus:
           Type: Api
@@ -67,3 +71,21 @@ Resources:
           Properties:
             Path: /syllabus/{id}
             Method: get
+
+  HealthFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/handlers/health/
+      Handler: app.lambda_handler
+      Runtime: python3.9
+      Events:
+        Health:
+          Type: Api
+          Properties:
+            Path: /health
+            Method: get
+
+Outputs:
+  WebEndpoint:
+    Description: "API Gateway endpoint URL for Prod stage"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"

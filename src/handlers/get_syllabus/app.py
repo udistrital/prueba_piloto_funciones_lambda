@@ -1,5 +1,9 @@
+# Get one syllabus
+
 import json
 import os
+
+from bson import ObjectId
 from pymongo import MongoClient
 
 SYLLABUS_CRUD_HOST = os.environ.get('SYLLABUS_CRUD_HOST')
@@ -9,37 +13,95 @@ SYLLABUS_CRUD_PASS = os.environ.get('SYLLABUS_CRUD_PASS')
 SYLLABUS_CRUD_DB = os.environ.get('SYLLABUS_CRUD_DB')
 
 
-def connect_db(database: str):
+def connect_db_client():
     try:
         # With password
         if SYLLABUS_CRUD_USERNAME and SYLLABUS_CRUD_PASS:
             uri = f"mongodb://{SYLLABUS_CRUD_USERNAME}:{SYLLABUS_CRUD_PASS}@" \
-                  f"{SYLLABUS_CRUD_HOST}:{SYLLABUS_CRUD_PORT}/{SYLLABUS_CRUD_DB}"
+                  f"{SYLLABUS_CRUD_HOST}:{SYLLABUS_CRUD_PORT}/"
         else:
             # Without password
-            uri = "mongodb://localhost:27017/prueba_piloto_lambda_db"
-            # uri = f"mongodb://{SYLLABUS_CRUD_HOST}:{SYLLABUS_CRUD_PORT}/{SYLLABUS_CRUD_DB}"
+            uri = f"mongodb://{SYLLABUS_CRUD_HOST}:{SYLLABUS_CRUD_PORT}/"
 
-        client = MongoClient(uri)
-        db = client[database]
-        print("Connection Successful")
-        return db
+        client = MongoClient(uri, uuidRepresentation='standard')
+        print("Client DB Successful")
+        return client
     except Exception as ex:
-        print("Error Connection")
-        print(ex)
+        print("Error Client DB")
+        print(f"Detail: {ex}")
         return None
 
 
 def close_connect_db(client):
     try:
-        client.close()
+        print("Closing client DB")
+        if client:
+            client.close()
     except Exception as ex:
-        print("Error close connection")
-        print(ex)
+        print("Error close Client DB")
+        print(f"Detail: {ex}")
+
+
+def format_response(result, message: str, status_code: int, success: bool):
+    if isinstance(result, dict):
+        if success:
+            if result.get("_id"):
+                result["_id"] = str(result["_id"])
+            if result.get("fecha_creacion"):
+                result["fecha_creacion"] = str(result["fecha_creacion"])
+
+            return {"statusCode": status_code,
+                    "body": json.dumps({
+                        "Success": success,
+                        "Status": status_code,
+                        "Message": message,
+                        "Data": result
+                    })}
+        else:
+            return {"statusCode": status_code,
+                    "body": json.dumps({
+                        "Success": success,
+                        "Status": status_code,
+                        "Message": message
+                    })}
 
 
 def lambda_handler(event, context):
-    # print(event)
-    # print(context)
-    return {"statusCode": 200,
-            "body": json.dumps({"message": "find!"})}
+    client = None
+    try:
+        syllabus_uuid = event["pathParameters"]["id"]
+        print(syllabus_uuid)
+        client = connect_db_client()
+        if client:
+            print("Connecting database ...")
+            syllabus_collection = client[str(SYLLABUS_CRUD_DB)]["syllabus"]
+            print("Connection database successful")
+            syllabus = syllabus_collection.find_one({
+                "_id": ObjectId(syllabus_uuid)
+            })
+            print(f"Consulted record.")
+            if syllabus:
+                print("Syllabus found!")
+                print(syllabus)
+                print(type(syllabus))
+                return format_response(
+                    syllabus,
+                    "Syllabus OK",
+                    200,
+                    True)
+            else:
+                print("Syllabus not found!")
+                close_connect_db(client)
+        return format_response(
+            {},
+            "Error get syllabus!",
+            403,
+            False)
+    except Exception as ex:
+        print("Error get syllabus")
+        print(f"Detail: {ex}")
+        return format_response(
+            {},
+            "Error get syllabus!",
+            403,
+            False)
