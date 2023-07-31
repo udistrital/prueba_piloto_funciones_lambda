@@ -47,6 +47,8 @@ def format_specific_values(result):
         result["_id"] = str(result["_id"])
     if result.get("fecha_creacion"):
         result["fecha_creacion"] = str(result["fecha_creacion"])
+    if result.get("fecha_modificacion"):
+        result["fecha_modificacion"] = str(result["fecha_modificacion"])
     return result
 
 
