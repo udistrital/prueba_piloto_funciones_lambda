@@ -7,6 +7,9 @@ Pruebas piloto CRUD del syllabus empleando AWS SAM.
 ### Tecnologías Implementadas y Versiones
 * [Python 3.9](https://docs.python.org/3.9/)
 * [AWS SAM](https://docs.aws.amazon.com/es_es/serverless-application-model/latest/developerguide/using-sam-cli.html)
+* [AWS SAM CLI](https://docs.aws.amazon.com/es_es/serverless-application-model/latest/developerguide/install-sam-cli.html)
+* Opcional (Requerido para ejecutar el servicio API en local, simula el API Gateway) [Docker](https://docs.docker.com/engine/install/ubuntu/)
+* Opcional (Gestión de versiones de librerias en local) [virtualenv](https://virtualenv.pypa.io/en/latest/installation.html)
 
 
 ### Variables de Entorno
