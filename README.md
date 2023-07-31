@@ -20,7 +20,7 @@ TIMEZONE=[zona horaria]
 ```
 
 **Nota:**
-* [Lista de zona horarias](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)
+* Por defecto se asignó "America/Bogota", para ver más opciones vea [Lista de zona horarias](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)
 
 
 ### Ejecución del Proyecto en Local
@@ -28,8 +28,9 @@ TIMEZONE=[zona horaria]
 sam build
 sam local start-api --env-vars env.json
 ```
-**Ver:**
-Para más detalle de las formas de ejecutarlo localmente vea [Uso sam local](https://docs.aws.amazon.com/es_es/serverless-application-model/latest/developerguide/using-sam-cli-local.html)
+**Nota:**
+* Para más detalle de las formas de ejecutarlo localmente vea [Uso sam local](https://docs.aws.amazon.com/es_es/serverless-application-model/latest/developerguide/using-sam-cli-local.html)
+* Puede usar el script `run_local.sh` para correr los comandos indicados anteriormente con bash. 
 
 ### Ejecución Pruebas
 
@@ -43,8 +44,8 @@ Pruebas unitarias
 sam build
 sam deploy --guided
 ```
-**Ver:** 
-Para mayor información para realizar el despliegue vea [Uso sam deploy](https://docs.aws.amazon.com/es_es/serverless-application-model/latest/developerguide/using-sam-cli-deploy.html).
+**Nota:** 
+* Para mayor información para realizar el despliegue vea [Uso sam deploy](https://docs.aws.amazon.com/es_es/serverless-application-model/latest/developerguide/using-sam-cli-deploy.html).
 
 ## Estado CI
 
