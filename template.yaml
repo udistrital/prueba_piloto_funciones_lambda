@@ -113,6 +113,27 @@ Resources:
             Path: /syllabus/{id}
             Method: put
 
+  DeleteSyllabusFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/handlers/delete_syllabus/
+      Handler: app.lambda_handler
+      Runtime: python3.9
+      Environment:
+        Variables:
+          SYLLABUS_CRUD_HOST: !Ref CrudHost
+          SYLLABUS_CRUD_PORT: !Ref CrudPort
+          SYLLABUS_CRUD_USERNAME: !Ref CrudUsername
+          SYLLABUS_CRUD_PASS: !Ref CrudPass
+          SYLLABUS_CRUD_DB: !Ref CrudDB
+          TIMEZONE: !Ref Timezone
+      Events:
+        DeleteSyllabus:
+          Type: Api
+          Properties:
+            Path: /syllabus/{id}
+            Method: delete
+
   HealthFunction:
     Type: AWS::Serverless::Function
     Properties:
