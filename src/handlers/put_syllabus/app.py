@@ -27,16 +27,21 @@ def local_now():
 
 class SyllabusModel(BaseModel):
     espacio_academico_id: int
-    justificacion: str
-    objetivo_general: str
-    objetivos_especificos: List
-    resultados_aprendizaje: List
-    articulacion_resultados_aprendizaje: str
-    contenido: Dict
-    estrategias: List
-    evaluacion: Dict
-    bibliografia: List
-    seguimiento: List
+    proyecto_curricular_id: int
+    plan_estudios_id: int
+    justificacion: Optional[str]
+    objetivo_general: Optional[str]
+    objetivos_especificos: Optional[List]
+    resultados_aprendizaje: Optional[List]
+    articulacion_resultados_aprendizaje: Optional[str]
+    contenido: Optional[Dict]
+    estrategias: Optional[List]
+    evaluacion: Optional[Dict]
+    bibliografia: Optional[List]
+    seguimiento: Optional[List]
+    sugerencias: Optional[str]
+    recursos_educativos: Optional[str]
+    practicas_academicas: Optional[str]
     activo: bool = Field(default=True)
     fecha_modificacion: Optional[datetime] = Field(default=local_now())
 
