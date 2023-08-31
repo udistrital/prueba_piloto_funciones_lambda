@@ -102,15 +102,19 @@ def lambda_handler(event, context):
                 )
             else:
                 close_connect_db(client)
+                return format_delete_response(
+                    "Syllabus not deleted",
+                    400,
+                    False)
         return format_delete_response(
             "Error deleting syllabus!",
-            403,
+            500,
             False)
     except Exception as ex:
         print("Error updating syllabus")
         print(f"Detail: {ex}")
         close_connect_db(client)
         return format_delete_response(
-            "Error deleting syllabus!",
-            403,
+            f"Error deleting syllabus! {ex}",
+            500,
             False)
