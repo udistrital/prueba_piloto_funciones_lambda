@@ -1,9 +1,8 @@
-# Get one syllabus
+# Get all syllabus
 
 import json
 import os
 
-from bson import ObjectId
 from pymongo import MongoClient, ASCENDING, DESCENDING
 
 SYLLABUS_CRUD_HOST = os.environ.get('SYLLABUS_CRUD_HOST')
@@ -102,6 +101,10 @@ def get_query(query_str: str) -> dict:
         kv = cond.split(":", 1)
         if len(kv) == 2:
             k, v = kv
+            if v == 'false':
+                v = False
+            elif v == 'true':
+                v = True
         else:
             k, v = kv[0], None
         query_total[k] = v
@@ -130,6 +133,7 @@ def get_sort_by(query_params) -> list:
 
 def parse_query_params(event) -> tuple:
     try:
+        print("event: ", event)
         query_params_result = {
             "limit": 10
         }
@@ -158,7 +162,7 @@ def parse_query_params(event) -> tuple:
 
             return query_params_result, None
         else:
-            return query_params_result, "Without params"
+            return query_params_result, None
     except Exception as ex:
         print("Error in parse_query_params")
         print(ex)
@@ -181,6 +185,7 @@ def lambda_handler(event, context):
                 print(f"Consulted record.")
                 if syllabus:
                     print("Syllabus found!")
+                    close_connect_db(client)
                     return format_response(
                         syllabus,
                         "Request successful",
@@ -189,6 +194,11 @@ def lambda_handler(event, context):
                 else:
                     print("Syllabus not found!")
                     close_connect_db(client)
+                    return format_response(
+                        [],
+                        "Request successful",
+                        200,
+                        True)
             else:
                 return format_response(
                     {},
@@ -198,7 +208,7 @@ def lambda_handler(event, context):
         return format_response(
             {},
             "Error get syllabus!",
-            403,
+            500,
             False)
     except Exception as ex:
         print("Error get syllabus")
@@ -206,6 +216,6 @@ def lambda_handler(event, context):
         close_connect_db(client)
         return format_response(
             {},
-            "Error get syllabus!",
-            403,
+            f"Error get syllabus! Detail: {ex}",
+            500,
             False)

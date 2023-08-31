@@ -86,6 +86,7 @@ def lambda_handler(event, context):
                 print("Syllabus found!")
                 print(syllabus)
                 print(type(syllabus))
+                close_connect_db(client)
                 return format_response(
                     syllabus,
                     "Syllabus OK",
@@ -94,10 +95,15 @@ def lambda_handler(event, context):
             else:
                 print("Syllabus not found!")
                 close_connect_db(client)
+                return format_response(
+                    {},
+                    "Syllabus Not Found",
+                    404,
+                    False)
         return format_response(
             {},
             "Error get syllabus!",
-            403,
+            500,
             False)
     except Exception as ex:
         print("Error get syllabus")
@@ -105,6 +111,6 @@ def lambda_handler(event, context):
         close_connect_db(client)
         return format_response(
             {},
-            "Error get syllabus!",
-            403,
+            f"Error get syllabus! Detail: {ex}",
+            500,
             False)

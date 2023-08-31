@@ -28,19 +28,19 @@ class SyllabusModel(BaseModel):
     espacio_academico_id: int
     proyecto_curricular_id: int
     plan_estudios_id: int
-    justificacion: Optional[str]
-    objetivo_general: Optional[str]
-    objetivos_especificos: Optional[List]
-    resultados_aprendizaje: Optional[List]
-    articulacion_resultados_aprendizaje: Optional[str]
-    contenido: Optional[Dict]
-    estrategias: Optional[List]
-    evaluacion: Optional[Dict]
-    bibliografia: Optional[List]
-    seguimiento: Optional[List]
-    sugerencias: Optional[str]
-    recursos_educativos: Optional[str]
-    practicas_academicas: Optional[str]
+    justificacion: Optional[str] = None
+    objetivo_general: Optional[str] = None
+    objetivos_especificos: Optional[List] = None
+    resultados_aprendizaje: Optional[List] = None
+    articulacion_resultados_aprendizaje: Optional[str] = None
+    contenido: Optional[Dict] = None
+    estrategias: Optional[List] = None
+    evaluacion: Optional[Dict] = None
+    bibliografia: Optional[List] = None
+    seguimiento: Optional[List] = None
+    sugerencias: Optional[str] = None
+    recursos_educativos: Optional[str] = None
+    practicas_academicas: Optional[str] = None
     activo: bool = Field(default=True)
     fecha_creacion: datetime = Field(default=local_now())
     fecha_modificacion: Optional[datetime] = None
@@ -124,6 +124,7 @@ def lambda_handler(event, context):
                 if result:
                     new_syllabus_id = result.inserted_id
                     new_syllabus = syllabus_collection.find_one(new_syllabus_id)
+                    close_connect_db(client)
                     return format_response(
                         new_syllabus,
                         "Created syllabus",
@@ -131,10 +132,15 @@ def lambda_handler(event, context):
                         True)
                 else:
                     close_connect_db(client)
+                    return format_response(
+                        {},
+                        "Syllabus was not created",
+                        400,
+                        False)
             return format_response(
                 {},
                 "Error registering new syllabus!",
-                403,
+                500,
                 False)
     except Exception as ex:
         print("Error creating register syllabus")
@@ -142,6 +148,6 @@ def lambda_handler(event, context):
         close_connect_db(client)
         return format_response(
             {},
-            "Error registering new syllabus!",
-            403,
+            f"Error registering new syllabus! Detail: {ex}",
+            500,
             False)

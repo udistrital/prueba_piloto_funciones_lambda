@@ -22,6 +22,7 @@ print(SYLLABUS_CRUD_DB)
 
 
 def local_now():
+    print(TIMEZONE)
     return datetime.now(tz=pytz.timezone(TIMEZONE))
 
 
@@ -29,19 +30,19 @@ class SyllabusModel(BaseModel):
     espacio_academico_id: int
     proyecto_curricular_id: int
     plan_estudios_id: int
-    justificacion: Optional[str]
-    objetivo_general: Optional[str]
-    objetivos_especificos: Optional[List]
-    resultados_aprendizaje: Optional[List]
-    articulacion_resultados_aprendizaje: Optional[str]
-    contenido: Optional[Dict]
-    estrategias: Optional[List]
-    evaluacion: Optional[Dict]
-    bibliografia: Optional[List]
-    seguimiento: Optional[List]
-    sugerencias: Optional[str]
-    recursos_educativos: Optional[str]
-    practicas_academicas: Optional[str]
+    justificacion: Optional[str] = None
+    objetivo_general: Optional[str] = None
+    objetivos_especificos: Optional[List] = None
+    resultados_aprendizaje: Optional[List] = None
+    articulacion_resultados_aprendizaje: Optional[str] = None
+    contenido: Optional[Dict] = None
+    estrategias: Optional[List] = None
+    evaluacion: Optional[Dict] = None
+    bibliografia: Optional[List] = None
+    seguimiento: Optional[List] = None
+    sugerencias: Optional[str] = None
+    recursos_educativos: Optional[str] = None
+    practicas_academicas: Optional[str] = None
     activo: bool = Field(default=True)
     fecha_modificacion: Optional[datetime] = Field(default=local_now())
 
@@ -117,6 +118,7 @@ def lambda_handler(event, context):
         if error is None:
             # Validate structure
             syllabus_data = SyllabusModel(**data).__dict__
+            syllabus_data["fecha_modificacion"] = local_now()
             print(syllabus_data)
             client = connect_db_client()
             filter_ = {"_id": ObjectId(syllabus_id)}
@@ -128,9 +130,10 @@ def lambda_handler(event, context):
                 result = syllabus_collection.update_one(
                     filter_,
                     {"$set": syllabus_data})
-                print(f"Updated syllabus {syllabus_id}")
-                if result:
+                if result.modified_count:
+                    print(f"Updated syllabus {syllabus_id}")
                     syllabus = syllabus_collection.find_one(filter_)
+                    close_connect_db(client)
                     return format_response(
                         syllabus,
                         "Updated syllabus",
@@ -138,10 +141,15 @@ def lambda_handler(event, context):
                         True)
                 else:
                     close_connect_db(client)
+                    return format_response(
+                        {},
+                        "Syllabus not updated",
+                        400,
+                        False)
             return format_response(
                 {},
                 "Error updating syllabus!",
-                403,
+                500,
                 False)
     except Exception as ex:
         print("Error updating syllabus")
@@ -149,6 +157,6 @@ def lambda_handler(event, context):
         close_connect_db(client)
         return format_response(
             {},
-            "Error updating syllabus!",
-            403,
+            f"Error updating syllabus! Detail: {ex}",
+            500,
             False)
