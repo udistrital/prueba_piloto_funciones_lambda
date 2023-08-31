@@ -1,0 +1,473 @@
+{
+	"info": {
+		"_postman_id": "88ffdb11-dc46-4084-9f5f-b012b2d27a4e",
+		"name": "Syllabus-UD-OAS",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "10904114"
+	},
+	"item": [
+		{
+			"name": "get all",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:3000/syllabus?query=activo:true&fields=espacio_academico_id,espacio_academico_id&sortby=espacio_academico_id&limit=1&offset=1",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "3000",
+					"path": [
+						"syllabus"
+					],
+					"query": [
+						{
+							"key": "query",
+							"value": "activo:true"
+						},
+						{
+							"key": "fields",
+							"value": "espacio_academico_id,espacio_academico_id"
+						},
+						{
+							"key": "sortby",
+							"value": "espacio_academico_id"
+						},
+						{
+							"key": "limit",
+							"value": "1"
+						},
+						{
+							"key": "offset",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "get all - example",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:3000/syllabus?query=activo:true&fields=espacio_academico_id,espacio_academico_id&sortby=espacio_academico_id&limit=1&offset=1",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "3000",
+							"path": [
+								"syllabus"
+							],
+							"query": [
+								{
+									"key": "query",
+									"value": "activo:true"
+								},
+								{
+									"key": "fields",
+									"value": "espacio_academico_id,espacio_academico_id"
+								},
+								{
+									"key": "sortby",
+									"value": "espacio_academico_id"
+								},
+								{
+									"key": "limit",
+									"value": "1"
+								},
+								{
+									"key": "offset",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Server",
+							"value": "Werkzeug/2.2.3 Python/3.11.3"
+						},
+						{
+							"key": "Date",
+							"value": "Wed, 30 Aug 2023 14:27:39 GMT"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Content-Length",
+							"value": "147"
+						},
+						{
+							"key": "Connection",
+							"value": "close"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"Success\": true,\n    \"Status\": 200,\n    \"Message\": \"Request successful\",\n    \"Data\": [\n        {\n            \"_id\": \"64c7da90cd63e2d0367900b5\",\n            \"espacio_academico_id\": 123456789\n        }\n    ]\n}"
+				}
+			]
+		},
+		{
+			"name": "get one",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:3000/syllabus/64c676c6c313d9aca4c29ab6",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "3000",
+					"path": [
+						"syllabus",
+						"64c676c6c313d9aca4c29ab6"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "get one - example",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:3000/syllabus/64c676c6c313d9aca4c29ab6",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "3000",
+							"path": [
+								"syllabus",
+								"64c676c6c313d9aca4c29ab6"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Server",
+							"value": "Werkzeug/2.2.3 Python/3.11.3"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 31 Aug 2023 00:32:33 GMT"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Content-Length",
+							"value": "676"
+						},
+						{
+							"key": "Connection",
+							"value": "close"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"Success\": true,\n    \"Status\": 200,\n    \"Message\": \"Syllabus OK\",\n    \"Data\": {\n        \"_id\": \"64c676c6c313d9aca4c29ab6\",\n        \"espacio_academico_id\": 123456,\n        \"justificacion\": null,\n        \"objetivo_general\": null,\n        \"objetivos_especificos\": [\n            \"obj 1\",\n            \"obj 2\",\n            \"obj 3\",\n            \"obj 4\"\n        ],\n        \"resultados_aprendizaje\": null,\n        \"articulacion_resultados_aprendizaje\": null,\n        \"contenido\": null,\n        \"estrategias\": null,\n        \"evaluacion\": null,\n        \"bibliografia\": null,\n        \"seguimiento\": null,\n        \"activo\": false,\n        \"fecha_creacion\": \"2023-07-30 14:42:14.260000\",\n        \"fecha_modificacion\": \"2023-08-31 00:32:08.868000\",\n        \"plan_estudios_id\": 1,\n        \"practicas_academicas\": null,\n        \"proyecto_curricular_id\": 1,\n        \"recursos_educativos\": null,\n        \"sugerencias\": null\n    }\n}"
+				}
+			]
+		},
+		{
+			"name": "put (precaución ver descripción)",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n        \"espacio_academico_id\": 123456,\n        \"proyecto_curricular_id\": 1,\n        \"plan_estudios_id\": 1,\n        \"justificacion\": \"Justificación del espacio académico\",\n        \"objetivo_general\": \"Objetivo de la asignatura\",\n        \"objetivos_especificos\": [\n            \"obj 1\",\n            \"obj 2\",\n            \"obj 3\",\n            \"obj 4\"\n        ],\n        \"resultados_aprendizaje\": [\n            \"res 1\",\n            \"res 2\",\n            \"res 2\"\n        ],\n        \"articulacion_resultados_aprendizaje\": \"text\",\n        \"contenido\": {\n            \"descripcion\": \"text\",\n            \"temas\": [\n                {\n                    \"nombre\": \"Algebra de matrices\",\n                    \"subtemas\": [\n                        {\n                            \"nombre\": \"Multiplicacion\"\n                        }\n                    ]\n                },\n                {\n                    \"nombre\": \"Fusión de imagenes.\",\n                    \"subtemas\": [\n                        {\n                            \"nombre\": \"Transformacion\"\n                        }\n                    ]\n                }\n            ]\n        },\n        \"estrategias\": [\n            {\n                \"nombre\": \"metodologia\",\n                \"descripcion\": \"text\",\n                \"pertinencia\": \"text\",\n                \"articulacion_ra\": \"text\"\n            }\n        ],\n        \"evaluacion\": {\n            \"descripcion\": \"text\",\n            \"evaluaciones\": [\n                {\n                    \"nombre\": \"text\",\n                    \"estrategia\": \"text\",\n                    \"momento\": \"text\",\n                    \"porcentaje\": 10\n                }\n            ]\n        },\n        \"bibliografia\": [\n            {\n                \"tipo\": \"básicas\",\n                \"referencias\": [\n                    \"text\",\n                    \"text\"\n                ]\n            }\n        ],\n        \"seguimiento\": [\n            {\n                \"elaboracion\": \"nombre\",\n                \"revision\": \"nombre\",\n                \"fecha\": \"12/05/2022\"\n            }\n        ],\n        \"activo\": true\n    }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:3000/syllabus/64c676c6c313d9aca4c29ab6",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "3000",
+					"path": [
+						"syllabus",
+						"64c676c6c313d9aca4c29ab6"
+					]
+				},
+				"description": "Se recomienda enviar todos los campos cada vez que se actualicen para evitar un cambio a nulo por el modelo."
+			},
+			"response": [
+				{
+					"name": "put - example",
+					"originalRequest": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n        \"espacio_academico_id\": 123456,\n        \"proyecto_curricular_id\": 1,\n        \"plan_estudios_id\": 1,\n        \"justificacion\": \"Justificación del espacio académico\",\n        \"objetivo_general\": \"Objetivo de la asignatura\",\n        \"objetivos_especificos\": [\n            \"obj 1\",\n            \"obj 2\",\n            \"obj 3\",\n            \"obj 4\"\n        ],\n        \"resultados_aprendizaje\": [\n            \"res 1\",\n            \"res 2\",\n            \"res 2\"\n        ],\n        \"articulacion_resultados_aprendizaje\": \"text\",\n        \"contenido\": {\n            \"descripcion\": \"text\",\n            \"temas\": [\n                {\n                    \"nombre\": \"Algebra de matrices\",\n                    \"subtemas\": [\n                        {\n                            \"nombre\": \"Multiplicacion\"\n                        }\n                    ]\n                },\n                {\n                    \"nombre\": \"Fusión de imagenes.\",\n                    \"subtemas\": [\n                        {\n                            \"nombre\": \"Transformacion\"\n                        }\n                    ]\n                }\n            ]\n        },\n        \"estrategias\": [\n            {\n                \"nombre\": \"metodologia\",\n                \"descripcion\": \"text\",\n                \"pertinencia\": \"text\",\n                \"articulacion_ra\": \"text\"\n            }\n        ],\n        \"evaluacion\": {\n            \"descripcion\": \"text\",\n            \"evaluaciones\": [\n                {\n                    \"nombre\": \"text\",\n                    \"estrategia\": \"text\",\n                    \"momento\": \"text\",\n                    \"porcentaje\": 10\n                }\n            ]\n        },\n        \"bibliografia\": [\n            {\n                \"tipo\": \"básicas\",\n                \"referencias\": [\n                    \"text\",\n                    \"text\"\n                ]\n            }\n        ],\n        \"seguimiento\": [\n            {\n                \"elaboracion\": \"nombre\",\n                \"revision\": \"nombre\",\n                \"fecha\": \"12/05/2022\"\n            }\n        ],\n        \"activo\": true\n    }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:3000/syllabus/64c676c6c313d9aca4c29ab6",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "3000",
+							"path": [
+								"syllabus",
+								"64c676c6c313d9aca4c29ab6"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Server",
+							"value": "Werkzeug/2.2.3 Python/3.11.3"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 31 Aug 2023 00:36:14 GMT"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Content-Length",
+							"value": "1299"
+						},
+						{
+							"key": "Connection",
+							"value": "close"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"Success\": true,\n    \"Status\": 200,\n    \"Message\": \"Updated syllabus\",\n    \"Data\": {\n        \"_id\": \"64c676c6c313d9aca4c29ab6\",\n        \"espacio_academico_id\": 123456,\n        \"justificacion\": \"Justificación del espacio académico\",\n        \"objetivo_general\": \"Objetivo de la asignatura\",\n        \"objetivos_especificos\": [\n            \"obj 1\",\n            \"obj 2\",\n            \"obj 3\",\n            \"obj 4\"\n        ],\n        \"resultados_aprendizaje\": [\n            \"res 1\",\n            \"res 2\",\n            \"res 2\"\n        ],\n        \"articulacion_resultados_aprendizaje\": \"text\",\n        \"contenido\": {\n            \"descripcion\": \"text\",\n            \"temas\": [\n                {\n                    \"nombre\": \"Algebra de matrices\",\n                    \"subtemas\": [\n                        {\n                            \"nombre\": \"Multiplicacion\"\n                        }\n                    ]\n                },\n                {\n                    \"nombre\": \"Fusión de imagenes.\",\n                    \"subtemas\": [\n                        {\n                            \"nombre\": \"Transformacion\"\n                        }\n                    ]\n                }\n            ]\n        },\n        \"estrategias\": [\n            {\n                \"nombre\": \"metodologia\",\n                \"descripcion\": \"text\",\n                \"pertinencia\": \"text\",\n                \"articulacion_ra\": \"text\"\n            }\n        ],\n        \"evaluacion\": {\n            \"descripcion\": \"text\",\n            \"evaluaciones\": [\n                {\n                    \"nombre\": \"text\",\n                    \"estrategia\": \"text\",\n                    \"momento\": \"text\",\n                    \"porcentaje\": 10\n                }\n            ]\n        },\n        \"bibliografia\": [\n            {\n                \"tipo\": \"básicas\",\n                \"referencias\": [\n                    \"text\",\n                    \"text\"\n                ]\n            }\n        ],\n        \"seguimiento\": [\n            {\n                \"elaboracion\": \"nombre\",\n                \"revision\": \"nombre\",\n                \"fecha\": \"12/05/2022\"\n            }\n        ],\n        \"activo\": true,\n        \"fecha_creacion\": \"2023-07-30 14:42:14.260000\",\n        \"fecha_modificacion\": \"2023-08-31 00:36:12.374000\",\n        \"plan_estudios_id\": 1,\n        \"practicas_academicas\": null,\n        \"proyecto_curricular_id\": 1,\n        \"recursos_educativos\": null,\n        \"sugerencias\": null\n    }\n}"
+				}
+			]
+		},
+		{
+			"name": "post",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n        \"espacio_academico_id\": 123456,\n        \"proyecto_curricular_id\": 1,\n        \"plan_estudios_id\": 1,\n        \"justificacion\": \"Justificación del espacio académico\",\n        \"objetivo_general\": \"Objetivo de la asignatura\",\n        \"objetivos_especificos\": [\n            \"obj 1\",\n            \"obj 2\",\n            \"obj 3\",\n            \"obj 4\"\n        ],\n        \"resultados_aprendizaje\": [\n            \"res 1\",\n            \"res 2\",\n            \"res 2\"\n        ],\n        \"articulacion_resultados_aprendizaje\": \"text\",\n        \"contenido\": {\n            \"descripcion\": \"text\",\n            \"temas\": [\n                {\n                    \"nombre\": \"Algebra de matrices\",\n                    \"subtemas\": [\n                        {\n                            \"nombre\": \"Multiplicacion\"\n                        }\n                    ]\n                },\n                {\n                    \"nombre\": \"Fusión de imagenes.\",\n                    \"subtemas\": [\n                        {\n                            \"nombre\": \"Transformacion\"\n                        }\n                    ]\n                }\n            ]\n        },\n        \"estrategias\": [\n            {\n                \"nombre\": \"metodologia\",\n                \"descripcion\": \"text\",\n                \"pertinencia\": \"text\",\n                \"articulacion_ra\": \"text\"\n            }\n        ],\n        \"evaluacion\": {\n            \"descripcion\": \"text\",\n            \"evaluaciones\": [\n                {\n                    \"nombre\": \"text\",\n                    \"estrategia\": \"text\",\n                    \"momento\": \"text\",\n                    \"porcentaje\": 10\n                }\n            ]\n        },\n        \"bibliografia\": [\n            {\n                \"tipo\": \"básicas\",\n                \"referencias\": [\n                    \"text\",\n                    \"text\"\n                ]\n            }\n        ],\n        \"seguimiento\": [\n            {\n                \"elaboracion\": \"nombre\",\n                \"revision\": \"nombre\",\n                \"fecha\": \"12/05/2022\"\n            }\n        ],\n        \"activo\": true\n    }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:3000/syllabus",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "3000",
+					"path": [
+						"syllabus"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "post - example",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n        \"espacio_academico_id\": 123456,\n        \"proyecto_curricular_id\": 1,\n        \"plan_estudios_id\": 1,\n        \"justificacion\": \"Justificación del espacio académico\",\n        \"objetivo_general\": \"Objetivo de la asignatura\",\n        \"objetivos_especificos\": [\n            \"obj 1\",\n            \"obj 2\",\n            \"obj 3\",\n            \"obj 4\"\n        ],\n        \"resultados_aprendizaje\": [\n            \"res 1\",\n            \"res 2\",\n            \"res 2\"\n        ],\n        \"articulacion_resultados_aprendizaje\": \"text\",\n        \"contenido\": {\n            \"descripcion\": \"text\",\n            \"temas\": [\n                {\n                    \"nombre\": \"Algebra de matrices\",\n                    \"subtemas\": [\n                        {\n                            \"nombre\": \"Multiplicacion\"\n                        }\n                    ]\n                },\n                {\n                    \"nombre\": \"Fusión de imagenes.\",\n                    \"subtemas\": [\n                        {\n                            \"nombre\": \"Transformacion\"\n                        }\n                    ]\n                }\n            ]\n        },\n        \"estrategias\": [\n            {\n                \"nombre\": \"metodologia\",\n                \"descripcion\": \"text\",\n                \"pertinencia\": \"text\",\n                \"articulacion_ra\": \"text\"\n            }\n        ],\n        \"evaluacion\": {\n            \"descripcion\": \"text\",\n            \"evaluaciones\": [\n                {\n                    \"nombre\": \"text\",\n                    \"estrategia\": \"text\",\n                    \"momento\": \"text\",\n                    \"porcentaje\": 10\n                }\n            ]\n        },\n        \"bibliografia\": [\n            {\n                \"tipo\": \"básicas\",\n                \"referencias\": [\n                    \"text\",\n                    \"text\"\n                ]\n            }\n        ],\n        \"seguimiento\": [\n            {\n                \"elaboracion\": \"nombre\",\n                \"revision\": \"nombre\",\n                \"fecha\": \"12/05/2022\"\n            }\n        ],\n        \"activo\": true\n    }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:3000/syllabus",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "3000",
+							"path": [
+								"syllabus"
+							]
+						}
+					},
+					"status": "CREATED",
+					"code": 201,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Server",
+							"value": "Werkzeug/2.2.3 Python/3.11.3"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 31 Aug 2023 00:38:58 GMT"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Content-Length",
+							"value": "1275"
+						},
+						{
+							"key": "Connection",
+							"value": "close"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"Success\": true,\n    \"Status\": 201,\n    \"Message\": \"Created syllabus\",\n    \"Data\": {\n        \"_id\": \"64efe121a1beb7510589b551\",\n        \"espacio_academico_id\": 123456,\n        \"proyecto_curricular_id\": 1,\n        \"plan_estudios_id\": 1,\n        \"justificacion\": \"Justificación del espacio académico\",\n        \"objetivo_general\": \"Objetivo de la asignatura\",\n        \"objetivos_especificos\": [\n            \"obj 1\",\n            \"obj 2\",\n            \"obj 3\",\n            \"obj 4\"\n        ],\n        \"resultados_aprendizaje\": [\n            \"res 1\",\n            \"res 2\",\n            \"res 2\"\n        ],\n        \"articulacion_resultados_aprendizaje\": \"text\",\n        \"contenido\": {\n            \"descripcion\": \"text\",\n            \"temas\": [\n                {\n                    \"nombre\": \"Algebra de matrices\",\n                    \"subtemas\": [\n                        {\n                            \"nombre\": \"Multiplicacion\"\n                        }\n                    ]\n                },\n                {\n                    \"nombre\": \"Fusión de imagenes.\",\n                    \"subtemas\": [\n                        {\n                            \"nombre\": \"Transformacion\"\n                        }\n                    ]\n                }\n            ]\n        },\n        \"estrategias\": [\n            {\n                \"nombre\": \"metodologia\",\n                \"descripcion\": \"text\",\n                \"pertinencia\": \"text\",\n                \"articulacion_ra\": \"text\"\n            }\n        ],\n        \"evaluacion\": {\n            \"descripcion\": \"text\",\n            \"evaluaciones\": [\n                {\n                    \"nombre\": \"text\",\n                    \"estrategia\": \"text\",\n                    \"momento\": \"text\",\n                    \"porcentaje\": 10\n                }\n            ]\n        },\n        \"bibliografia\": [\n            {\n                \"tipo\": \"básicas\",\n                \"referencias\": [\n                    \"text\",\n                    \"text\"\n                ]\n            }\n        ],\n        \"seguimiento\": [\n            {\n                \"elaboracion\": \"nombre\",\n                \"revision\": \"nombre\",\n                \"fecha\": \"12/05/2022\"\n            }\n        ],\n        \"sugerencias\": null,\n        \"recursos_educativos\": null,\n        \"practicas_academicas\": null,\n        \"activo\": true,\n        \"fecha_creacion\": \"2023-08-31 00:38:57.053000\",\n        \"fecha_modificacion\": null\n    }\n}"
+				}
+			]
+		},
+		{
+			"name": "health check",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:3000/health",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "3000",
+					"path": [
+						"health"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "health check - example",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:3000/health",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "3000",
+							"path": [
+								"health"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Server",
+							"value": "Werkzeug/2.2.3 Python/3.11.3"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 31 Aug 2023 01:27:56 GMT"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Content-Length",
+							"value": "96"
+						},
+						{
+							"key": "Connection",
+							"value": "close"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"Success\": true,\n    \"Status\": 200,\n    \"Message\": \"Prueba piloto funciones lambda con SAM - Syllabus\"\n}"
+				}
+			]
+		},
+		{
+			"name": "delete",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:3000/syllabus/64c676c6c313d9aca4c29ab6",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "3000",
+					"path": [
+						"syllabus",
+						"64c676c6c313d9aca4c29ab6"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
