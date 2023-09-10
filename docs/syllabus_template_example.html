@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Carlito:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+    <title>Formato Syllabus</title>
+    <style>
+        @page {
+            margin: 0.3in 0.3in;
+            size: Letter;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: "Carlito", sans-serif;
+            text-align: justify;
+            text-justify: inter-word;
+            margin: 0;
+            padding: 0;
+        }
+
+        table, th, td {
+            border: 2px solid black;
+            word-wrap: break-word;
+            font-size: 12px;
+            padding: 1px 3px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 0;
+            border-spacing: 0;
+            text-align: left;
+            table-layout: fixed;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+
+        .bold {
+            font-weight: bold;
+        }
+
+        .center-image {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            width: 100px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 21cm;
+            margin: 0 auto;
+        }
+
+        .table-header {
+            background-color: #c9c9c9;
+            /*#d3d3d3*/
+        }
+
+        .text-center {
+            text-align: center !important;
+        }
+
+        .text-justify {
+            text-align: justify !important;
+        }
+
+        .text-padding {
+            padding-top: 5px;
+            padding-bottom: 5px;
+        }
+
+        .text-left {
+            text-align: left !important;
+        }
+
+        .version-doc {
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <table>
+            <tr>
+                <td colspan="2">
+                    <div>
+                        <img src="https://raw.githubusercontent.com/udistrital/prueba_piloto_funciones_lambda/develop/img/escudo_linea_negro.png"
+                        alt="Escudo UD"
+                        class="center-image"
+                        width="10px">
+                    </div>
+                </td>
+                <td class="bold text-center" colspan="7">
+                    <p class="bold text-center">
+                        UNIVERSIDAD DISTRITAL <br>
+                        FRANCISCO JOSÉ DE CALDAS
+                    </p>
+                    <br>
+                    <p class="bold text-center">
+                        SYLLABUS
+                    </p>
+                </td>
+            </tr>
+            <tr>
+                <td class="bold" colspan="2">
+                    <p>FACULTAD:</p>
+                </td>
+                <td colspan="7">
+                    {{ nombre_facultad }}
+                </td>
+            </tr>
+            <tr>
+                <td class="bold" colspan="2">
+                    <p>PROYECTO CURRICULAR:</p>
+                </td>
+                <td colspan="4">
+                    {{ nombre_proyecto_curricular }}
+                </td>
+                <td class="bold text-center" colspan="2">
+                    <p class="text-center">CÓDIGO PLAN DE ESTUDIOS:</p>
+                </td>
+                <td class="text-center" colspan="1">
+                    <p class="text-center">
+                        {{ cod_plan_estudio }}
+                    </p>
+                </td>
+            </tr>
+            <tr>
+                <td class="bold text-center" colspan="9">
+                    <p class="text-center">I. IDENTIFICACIÓN DEL ESPACIO ACADÉMICO</p>
+                </td>
+            </tr>
+            <tr>
+                <td class="bold table-header" colspan="9">
+                    <p>
+                        NOMBRE DEL ESPACIO ACADÉMICO: {{ nombre_espacio_academico }}
+                    </p>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3">
+                    <p>
+                        Código del espacio académico:
+                    </p>
+                </td>
+                <td class="text-center" colspan="1">
+                    <p class="text-center">
+                        {{ cod_espacio_academico }}
+                    </p>
+                </td>
+                <td colspan="3">
+                    <p>
+                        Número de créditos académicos:
+                    </p>
+                </td>
+                <td colspan="2">
+                    <p class="text-center">
+                        {{ num_creditos }}
+                    </p>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3">
+                    <p>
+                        Distribución horas de trabajo:
+                    </p>
+                </td>
+                <td class="text-center" colspan="1">
+                    <p class="text-center">
+                        HTD
+                    </p>
+                </td>
+                <td class="text-center" colspan="1">
+                    <p class="text-center">
+                        {{ htd }}
+                    </p>
+                </td>
+                <td class="text-center" colspan="1">
+                    <p class="text-center">
+                        HTC
+                    </p>
+                </td>
+                <td class="text-center" colspan="1">
+                    <p class="text-center">
+                        {{ htc }}
+                    </p>
+                </td>
+                <td class="text-center" colspan="1">
+                    <p class="text-center">
+                        HTA
+                    </p>
+                </td>
+                <td colspan="1">
+                    <p class="text-center">
+                        {{ hta }}
+                    </p>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3">
+                    <p>
+                        Tipo de espacio académico (X):
+                    </p>
+                </td>
+                <td class="text-center" colspan="1">
+                    <p class="text-center">
+                        Asignatura
+                    </p>
+                </td>
+                <td class="text-center" colspan="1">
+                    {% if es_asignatura %}
+                    <p class="text-center">
+                        X
+                    </p>
+                    {% endif %}
+                </td>
+                <td class="text-center" colspan="1">
+                    <p class="text-center">
+                        Cátedra
+                    </p>
+                </td>
+                <td class="text-center" colspan="1">
+                    {% if es_catedra %}
+                    <p class="text-center">
+                        X
+                    </p>
+                    {% endif %}
+                </td>
+                <td colspan="1">
+                </td>
+                <td colspan="1">
+                </td>
+            </tr>
+            <tr>
+                <td class="bold table-header text-center" colspan="9">
+                    <p class="text-center">
+                        NATURALEZA DEL ESPACIO ACADÉMICO (X):
+                    </p>
+                </td>
+            </tr>
+            <tr>
+                <td class="text-center" colspan="1">
+                    <p class="text-center">
+                        Obligatorio Básico
+                    </p>
+                </td>
+                <td class="text-center" colspan="1">
+                    {% if es_obligatorio_basico %}
+                    <p class="text-center">
+                        X
+                    </p>
+                    {% endif %}
+                </td>
+                <td class="text-center" colspan="2">
+                    <p class="text-center">
+                        Obligatorio Complementario
+                    </p>
+                </td>
+                <td class="text-center" colspan="1">
+                    {% if es_obligatorio_comp %}
+                    <p class="text-center">
+                        X
+                    </p>
+                    {% endif %}
+                </td>
+                <td class="text-center" colspan="1">
+                    <p class="text-center">
+                        Electivo Intrínseco
+                    </p>
+                </td>
+                <td class="text-center" colspan="1">
+                    {% if es_electivo_int %}
+                    <p class="text-center">
+                        X
+                    </p>
+                    {% endif %}
+                </td>
+                <td class="text-center" colspan="1">
+                    <p class="text-center">
+                        Electivo Extrínseco
+                    </p>
+                </td>
+                <td class="text-center" colspan="1">
+                    {% if es_electivo_ext %}
+                    <p class="text-center">
+                        X
+                    </p>
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <td class="bold table-header text-center" colspan="9">
+                    <p class="text-center">
+                        CARÁCTER DEL ESPACIO ACADÉMICO (X):
+                    </p>
+                </td>
+            </tr>
+            <tr>
+                <td class="text-center" colspan="1">
+                    <p class="text-center">
+                        Teórico
+                    </p>
+                </td>
+                <td class="text-center" colspan="1">
+                    {% if es_teorico %}
+                    <p class="text-center">
+                        X
+                    </p>
+                    {% endif %}
+                </td>
+                <td class="text-center" colspan="1">
+                    <p class="text-center">
+                        Práctico
+                    </p>
+                </td>
+                <td class="text-center" colspan="1">
+                    {% if es_practico %}
+                    <p class="text-center">
+                        X
+                    </p>
+                    {% endif %}
+                </td>
+                <td class="text-center" colspan="1">
+                    <p class="text-center">
+                        Teórico-Práctico
+                    </p>
+                </td>
+                <td class="text-center" colspan="1">
+                    {% if es_teorico_practico %}
+                    <p class="text-center">
+                        X
+                    </p>
+                    {% endif %}
+                </td>
+                <td colspan="1">
+                    <p>
+                        Otros: (abrir desplegable)
+                    </p>
+                </td>
+                <td class="text-center" colspan="1">
+                    {% if otro_caracter_esp_academico %}
+                    <p class="text-center">
+                        X
+                    </p>
+                    {% endif %}
+                </td>
+                <td colspan="1">
+                    {% if cual_otro_caracter %}
+                    <p class="text-justify text-padding">
+                        Cuál: {{ cual_otro_caracter }}
+                    </p>
+                    {% else %}
+                    <p class="text-justify text-padding">
+                        Cuál:_______
+                    </p>
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <td class="bold table-header text-center" colspan="9">
+                    <p class="text-center">
+                        MODALIDAD DE OFERTA DEL ESPACIO ACADÉMICO (X):
+                    </p>
+                </td>
+            </tr>
+            <tr>
+                <td class="text-center" colspan="1">
+                    <p class="text-center">
+                        Presencial
+                    </p>
+                </td>
+                <td class="text-center" colspan="1">
+                    {% if es_presencial %}
+                    <p class="text-center">
+                        X
+                    </p>
+                    {% endif %}
+                </td>
+                <td class="text-center" colspan="1">
+                    <p class="text-center">
+                        Presencial con incorporación de TIC
+                    </p>
+                </td>
+                <td class="text-center" colspan="1">
+                    {% if es_presencial_tic %}
+                    <p class="text-center">
+                        X
+                    </p>
+                    {% endif %}
+                </td>
+                <td class="text-center" colspan="1">
+                    <p class="text-center">
+                        Virtual
+                    </p>
+                </td>
+                <td class="text-center" colspan="1">
+                    {% if es_virtual %}
+                    <p class="text-center">
+                        X
+                    </p>
+                    {% endif %}
+                </td>
+                <td colspan="1">
+                    <p>
+                        Otros:
+                    </p>
+                </td>
+                <td class="text-center" colspan="1">
+                    {% if otra_modalidad %}
+                    <p class="text-center">
+                        X
+                    </p>
+                    {% endif %}
+                </td>
+                <td colspan="1">
+                    {% if cual_otra_modalidad %}
+                    <p class="text-justify text-padding">
+                        Cuál: {{ cual_otra_modalidad }}
+                    </p>
+                    {% else %}
+                    <p class="text-justify text-padding">
+                        Cuál:_______
+                    </p>
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <td class="bold table-header text-center" colspan="9">
+                    <p class="text-center">
+                        II. SUGERENCIAS DE SABERES Y CONOCIMIENTOS PREVIOS
+                    </p>
+                </td>
+            </tr>
+            <tr>
+                <td class="text-justify" colspan="9">
+                    <p class="text-justify text-padding">
+                        {{ sugerencias }}
+                    </p>
+                </td>
+            </tr>
+            <tr>
+                <td class="bold table-header text-center" colspan="9">
+                    <p class="text-center">
+                        III. JUSTIFICACIÓN DEL ESPACIO ACADÉMICO
+                    </p>
+                </td>
+            </tr>
+            <tr>
+                <td class="text-justify" colspan="9">
+                    <p class="text-justify text-padding">
+                        {{ justificacion }}
+                    </p>
+                </td>
+            </tr>
+            <tr>
+                <td class="bold table-header text-center" colspan="9">
+                    <p class="text-center">
+                        IV. OBJETIVOS DEL ESPACIO ACADÉMICO (GENERAL Y ESPECÍFICOS)
+                    </p>
+                </td>
+            </tr>
+            <tr>
+                <td class="text-justify" colspan="9">
+                    <p class="text-justify text-padding">
+                        {{ objetivo_general }}
+                        <br> <br>
+                        {{ objetivos_especificos }}
+                    </p>
+                </td>
+            </tr>
+            <tr>
+                <td class="bold table-header text-center" colspan="9">
+                    <p class="text-center">
+                        V. PROPÓSITOS DE FORMACIÓN Y DE APRENDIZAJE (PFA) DEL ESPACIO ACADEMICO
+                    </p>
+                </td>
+            </tr>
+            <tr>
+                <td class="text-justify" colspan="9">
+                    {% if propositos is iterable and (propositos is not string and propositos is not mapping) %}
+                    <table>
+                        <thead>
+                            <tr>
+                                <th class="text-center">#</th>
+                                <th class="text-center">PFA del programa / proyecto</th>
+                                <th class="text-center">PFA de la asignatura</th>
+                                <th class="text-center">Competencias</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for proposito in propositos %}
+                            <tr>
+                                <td class="text-center"> {{ loop.index }} </td>
+                                <td class="text-justify"> {{ proposito.pfa_programa }} </td>
+                                <td class="text-justify"> {{ proposito.pfa_asignatura }} </td>
+                                <td class="text-justify"> {{ proposito.competencias }} </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <p class="text-justify text-padding">
+                        {{ propositos }}
+                    </p>
+                    {% endif %}
+
+                </td>
+            </tr>
+            <tr>
+                <td class="bold table-header text-center" colspan="9">
+                    <p class="text-center">
+                        VI. CONTENIDOS TEMÁTICOS
+                    </p>
+                </td>
+            </tr>
+            <tr>
+                <td class="text-justify" colspan="9">
+                    <p class="text-justify text-padding">
+                        {{ contenido_tematico }}
+                    </p>
+                </td>
+            </tr>
+            <tr>
+                <td class="bold table-header text-center" colspan="9">
+                    <p class="text-center">
+                        VII. ESTRATEGIAS DE ENSEÑANZA QUE FAVORECEN EL APRENDIZAJE
+                    </p>
+                </td>
+            </tr>
+            <tr>
+                <td class="text-justify" colspan="9">
+                    <p class="text-justify text-padding">
+                        {{ estrategias_ensenanza }}
+                    </p>
+                </td>
+            </tr>
+            <tr>
+                <td class="bold table-header text-center" colspan="9">
+                    <p class="text-center">
+                        VIII. EVALUACIÓN
+                    </p>
+                </td>
+            </tr>
+            <tr>
+                <td class="text-justify" colspan="9">
+                    <p class="text-justify text-padding">
+                        {{ evaluacion }}
+                    </p>
+                </td>
+            </tr>
+            <tr>
+                <td class="bold table-header text-center" colspan="9">
+                    <p class="text-center">
+                        IX. MEDIOS Y RECURSOS EDUCATIVOS
+                    </p>
+                </td>
+            </tr>
+            <tr>
+                <td class="text-justify" colspan="9">
+                    <p class="text-justify text-padding">
+                        {{ medios_recursos }}
+                    </p>
+                </td>
+            </tr>
+            <tr>
+                <td class="bold table-header text-center" colspan="9">
+                    <p class="text-center">
+                        X. PRÁCTICAS ACADÉMICAS - SALIDAS DE CAMPO
+                    </p>
+                </td>
+            </tr>
+            <tr>
+                <td class="text-justify" colspan="9">
+                    <p class="text-justify text-padding">
+                        {{ practicas_salidas }}
+                    </p>
+                </td>
+            </tr>
+            <tr>
+                <td class="bold table-header text-center" colspan="9">
+                    <p class="text-center">
+                        XI. BIBLIOGRAFÍA
+                    </p>
+                </td>
+            </tr>
+            <tr>
+                <td class="text-justify" colspan="9">
+                    <p class="text-justify text-padding">
+                        Básicas <br>
+                        {{ bibliografia_basica }}
+                    </p>
+                    <p class="text-justify text-padding">
+                        Complementarias <br>
+                        {{ bibliografia_complementaria }}
+                    </p>
+                    <p class="text-justify text-padding">
+                        Páginas web <br>
+                        {{ bibliografia_paginas }}
+                    </p>
+                </td>
+            </tr>
+            <tr>
+                <td class="bold table-header text-center" colspan="9">
+                    <p class="text-center">
+                        XII. SEGUIMIENTO Y ACTUALIZACIÓN DEL SYLLABUS
+                    </p>
+                </td>
+            </tr>
+            <tr>
+                <td class="text-justify" colspan="3">
+                    <p class="text-justify">
+                        Fecha revisión por Consejo Curricular:
+                    </p>
+                </td>
+                <td class="text-justify" colspan="6">
+                    <p class="text-justify">
+                        {{ fecha_rev_consejo }}
+                    </p>
+                </td>
+            </tr>
+            <tr>
+                <td class="text-justify" colspan="3">
+                    <p class="text-justify">
+                        Fecha aprobación por Consejo Curricular:
+                    </p>
+                </td>
+                <td class="text-justify" colspan="3">
+                    <p class="text-justify">
+                        {{ fecha_aprob_consejo }}
+                    </p>
+                </td>
+                <td class="text-justify" colspan="1">
+                    <p class="text-justify">
+                        Número de acta:
+                    </p>
+                </td>
+                <td class="text-center" colspan="2">
+                    <p class="text-center">
+                        {{ num_acta }}
+                    </p>
+                </td>
+            </tr>
+        </table>
+        <div>
+            <p class="version-doc">
+                Documento versión: 12 julio 2023
+            </p>
+        </div>
+    </div>
+</body>
+</html>
