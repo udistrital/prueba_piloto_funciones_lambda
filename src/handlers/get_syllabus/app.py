@@ -106,8 +106,7 @@ def lambda_handler(event, context):
             500,
             False)
     except Exception as ex:
-        print("Error get syllabus")
-        print(f"Detail: {ex}")
+        print(f"Error get syllabus. Detail: {ex}")
         close_connect_db(client)
         return format_response(
             {},

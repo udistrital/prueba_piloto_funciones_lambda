@@ -134,6 +134,19 @@ Resources:
             Path: /syllabus/{id}
             Method: delete
 
+  PostSyllabusPdfFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/handlers/html_2_pdf/
+      Handler: app.lambda_handler
+      Runtime: python3.9
+      Events:
+        GetSyllabusPdf:
+          Type: Api
+          Properties:
+            Path: /syllabus/template/{pensum_id}/{carrera_id}/{asignatura_cod}
+            Method: post
+
   HealthFunction:
     Type: AWS::Serverless::Function
     Properties:
