@@ -2,8 +2,8 @@
 
 import json
 import os
+import uuid
 
-from bson import ObjectId
 from pymongo import MongoClient
 
 SYLLABUS_CRUD_HOST = os.environ.get('SYLLABUS_CRUD_HOST')
@@ -51,6 +51,8 @@ def format_response(result, message: str, status_code: int, success: bool):
                 result["fecha_creacion"] = str(result["fecha_creacion"])
             if result.get("fecha_modificacion"):
                 result["fecha_modificacion"] = str(result["fecha_modificacion"])
+            if result.get("syllabus_code"):
+                result["syllabus_code"] = str(result["syllabus_code"])
 
             return {"statusCode": status_code,
                     "body": json.dumps({
@@ -71,15 +73,16 @@ def format_response(result, message: str, status_code: int, success: bool):
 def lambda_handler(event, context):
     client = None
     try:
-        syllabus_id = event["pathParameters"]["id"]
-        print(syllabus_id)
+        syllabus_code = event["pathParameters"]["id"]
+        print(syllabus_code)
         client = connect_db_client()
         if client:
             print("Connecting database ...")
             syllabus_collection = client[str(SYLLABUS_CRUD_DB)]["syllabus"]
             print("Connection database successful")
             syllabus = syllabus_collection.find_one({
-                "_id": ObjectId(syllabus_id)
+                "syllabus_code": uuid.UUID(syllabus_code),
+                "syllabus_actual": True
             })
             print(f"Consulted record.")
             if syllabus:
