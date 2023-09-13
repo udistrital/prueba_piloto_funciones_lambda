@@ -11,23 +11,30 @@ TEMPLATE_STR = '<!DOCTYPE html>\n<html lang="es">\n<head>\n    <meta charset="UT
 
 def get_space_data(pensum_id, carrera_id, asignatura_cod) -> (dict, bool):
     try:
+        print("Consultando data requerida")
         url = f"http://busservicios.intranetoas.udistrital.edu.co:8282/wso2eiserver/services/" \
               f"academica_pruebas/detalle_espacio_academico/{pensum_id}/{carrera_id}/{asignatura_cod}"
 
         response_xml = requests.get(url)
+        print("Finalizada la consulta a la fuente")
         response_xml.raise_for_status()
 
+        print("Extrayendo XML")
         tree_xml = ET.fromstring(response_xml.content)
+        print("Datos extraidos")
 
         if len(list(tree_xml)) > 0:
+            print("Si tiene espacios")
             data = {}
             for space in list(tree_xml):
                 for field_space in list(space):
                     data[str(field_space.tag).split("}")[-1]] = field_space.text
             return data, False
         else:
+            print("No tiene espacios")
             return {"error": "Without academic spaces"}, True
     except Exception as ex:
+        print("Error consultado datos requeridos")
         print(ex)
         return {"error": str(ex)}, True
 
@@ -36,6 +43,7 @@ def make_pdf(html: str):
     """Generate a PDF file from a string of HTML"""
     print("make_pdf")
     html_doc = HTML(string=html)
+    #html_doc.write_pdf("/home/edwargl/Documentos/OAS/out_2.pdf")
     byte_doc = html_doc.write_pdf()
     encoded = base64.b64encode(byte_doc)
     return encoded.decode('utf-8')
@@ -69,7 +77,12 @@ def format_response(result, message: str, status_code: int, success: bool):
 def lambda_handler(event, context):
     try:
         print(event)
-        space_data, err = get_space_data(307, 375, 1)
+        # space_data, err = get_space_data(307, 375, 1)
+        space_data = {
+            "tipo": "asignatura",
+            "cea_abr": "ob"
+        }
+        err = False
         if not err:
             es_asignatura = str(space_data.get("tipo")).lower() == "asignatura"
             plan_data = {
