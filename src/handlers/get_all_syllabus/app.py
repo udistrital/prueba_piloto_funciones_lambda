@@ -4,6 +4,7 @@ import json
 import os
 import uuid
 
+from bson import ObjectId
 from pymongo import MongoClient, ASCENDING, DESCENDING
 
 SYLLABUS_CRUD_HOST = os.environ.get('SYLLABUS_CRUD_HOST')
@@ -118,6 +119,9 @@ def get_query(query_str: str) -> dict:
                 v = int(v)
             elif k == 'syllabus_code':
                 v = uuid.UUID(v)
+
+            if k == "_id":
+                v = ObjectId(v)
         else:
             k, v = kv[0], None
         query_total[k] = v
@@ -187,9 +191,7 @@ def lambda_handler(event, context):
     try:
         client = connect_db_client()
         if client:
-            print("Connecting database ...")
             syllabus_collection = client[str(SYLLABUS_CRUD_DB)]["syllabus"]
-            print("Connection database successful")
             query_complement, err = parse_query_params(event)
             if err is None:
                 print("Query")

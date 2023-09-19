@@ -86,9 +86,7 @@ def lambda_handler(event, context):
         client = connect_db_client()
         if client:
             filter_ = {"_id": ObjectId(syllabus_id)}
-            print("Connecting database ...")
             syllabus_collection = client[str(SYLLABUS_CRUD_DB)]["syllabus"]
-            print("Connection database successful")
             print("Deleting syllabus")
             result = syllabus_collection.update_one(
                 filter_,

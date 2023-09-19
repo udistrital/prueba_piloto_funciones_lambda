@@ -137,15 +137,18 @@ Resources:
   PostSyllabusPdfFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: src/handlers/html_2_pdf/
-      Handler: app.lambda_handler
-      Runtime: python3.9
+      PackageType: Image
       Events:
         GetSyllabusPdf:
           Type: Api
           Properties:
-            Path: /syllabus/template/{pensum_id}/{carrera_id}/{asignatura_cod}
+            Path: /syllabus/template
             Method: post
+    Metadata:
+      DockerTag: latest
+      DockerContext: src/handlers/html_2_pdf
+      Dockerfile: Dockerfile
+
 
   HealthFunction:
     Type: AWS::Serverless::Function

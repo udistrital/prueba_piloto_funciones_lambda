@@ -77,9 +77,7 @@ def lambda_handler(event, context):
         print(syllabus_code)
         client = connect_db_client()
         if client:
-            print("Connecting database ...")
             syllabus_collection = client[str(SYLLABUS_CRUD_DB)]["syllabus"]
-            print("Connection database successful")
             syllabus = syllabus_collection.find_one({
                 "syllabus_code": uuid.UUID(syllabus_code),
                 "syllabus_actual": True

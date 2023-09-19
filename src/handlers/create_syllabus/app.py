@@ -40,11 +40,12 @@ class SyllabusModel(BaseModel):
     contenido: Optional[Dict] = None
     estrategias: Optional[List] = None
     evaluacion: Optional[Dict] = None
-    bibliografia: Optional[List] = None
-    seguimiento: Optional[List] = None
+    bibliografia: Optional[Dict] = None
+    seguimiento: Optional[Dict] = None
     sugerencias: Optional[str] = None
     recursos_educativos: Optional[str] = None
     practicas_academicas: Optional[str] = None
+    vigencia: Optional[Dict] = None
     activo: bool = Field(default=True)
     fecha_creacion: datetime = Field(default=local_now())
     fecha_modificacion: Optional[datetime] = None
@@ -153,9 +154,7 @@ def lambda_handler(event, context):
             syllabus_data = SyllabusModel(**data).__dict__
             client = connect_db_client()
             if client:
-                print("Connecting database ...")
                 syllabus_collection = client[str(SYLLABUS_CRUD_DB)]["syllabus"]
-                print("Connection database successful")
                 if syllabus_data.get("syllabus_code"):
                     syllabus_data["syllabus_code"] = uuid.UUID(syllabus_data.get("syllabus_code"))
                 else:
@@ -186,6 +185,13 @@ def lambda_handler(event, context):
             return format_response(
                 {},
                 "Error registering new syllabus!",
+                500,
+                False)
+        else:
+            print(error)
+            return format_response(
+                {},
+                "Error registering new syllabus! Detail: Error in input data",
                 500,
                 False)
     except Exception as ex:

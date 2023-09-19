@@ -14,6 +14,7 @@
    "es_obligatorio_comp":false,
    "es_electivo_int":false,
    "es_electivo_ext":false,
+   "es_electivo":false,
    "es_teorico":false,
    "es_practico":false,
    "es_teorico_practico":true,
