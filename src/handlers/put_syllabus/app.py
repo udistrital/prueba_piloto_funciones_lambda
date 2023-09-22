@@ -44,6 +44,7 @@ class SyllabusModel(BaseModel):
     recursos_educativos: Optional[str] = None
     practicas_academicas: Optional[str] = None
     vigencia: Optional[Dict] = None
+    idioma_espacio_id: Optional[List] = None
     activo: bool = Field(default=True)
     fecha_modificacion: Optional[datetime] = Field(default=local_now())
 
