@@ -1,20 +1,27 @@
-FROM public.ecr.aws/lambda/python:3.9-x86_64
+# Define custom function directory
+ARG FUNCTION_DIR="/function"
 
-RUN yum update -y
+FROM python:3.9 as build-image
 
-RUN yum install -y redhat-rpm-config  \
-    python-devel  \
-    python-pip  \
-    python-setuptools  \
-    python-pillow \
-    python-wheel  \
-    python-cffi  \
-    libffi-devel  \
-    python3-brotli \
-    cairo  \
-    pango  \
-    gdk-pixbuf2
+# Include global arg in this stage of the build
+ARG FUNCTION_DIR
 
-COPY app.py requirements.txt ./
-RUN pip3 install -r requirements.txt
+# Copy function code
+RUN mkdir -p ${FUNCTION_DIR}
+COPY app.py ${FUNCTION_DIR}
+COPY requirements.txt .
+
+# Install the function's dependencies
+RUN pip install \
+    -r requirements.txt \
+    --target ${FUNCTION_DIR} \
+        awslambdaric
+
+# Set working directory to function root directory
+WORKDIR ${FUNCTION_DIR}
+
+# Set runtime interface client as default command for the container runtime
+ENTRYPOINT [ "/usr/local/bin/python", "-m", "awslambdaric" ]
+
+# Pass the name of the function handler as an argument to the runtime
 CMD ["app.lambda_handler"]
