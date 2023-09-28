@@ -1,3 +1,2 @@
 Jinja2==3.1.2
-requests==2.31.0
-weasyprint==59.0
+weasyprint==54.0

@@ -3,19 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Carlito:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
     <title>Formato Syllabus</title>
     <style>
         @page {
-            margin: 0.3in 0.3in;
+            margin: 0.5in 0.3in;
             size: Letter;
         }
 
         * {
             box-sizing: border-box;
-            font-family: "Carlito", sans-serif;
+            font-family: sans-serif;
             text-align: justify;
             text-justify: inter-word;
             margin: 0;
@@ -26,7 +23,7 @@
             border: 2px solid black;
             word-wrap: break-word;
             font-size: 12px;
-            padding: 1px 3px;
+            padding: 2px 5px;
         }
 
         table {
@@ -36,8 +33,12 @@
             border-spacing: 0;
             text-align: left;
             table-layout: fixed;
-            margin-top: 10px;
-            margin-bottom: 10px;
+            margin-top: 0px;
+            margin-bottom: 0px;
+        }
+
+        ul {
+            padding-left: 20px;
         }
 
         .bold {
@@ -59,7 +60,6 @@
 
         .table-header {
             background-color: #c9c9c9;
-            /*#d3d3d3*/
         }
 
         .text-center {
@@ -82,6 +82,14 @@
         .version-doc {
             font-size: 12px;
         }
+
+        .without-border-bottom {
+            border-bottom: none !important;
+        }
+
+        .without-border-top {
+            border-top: none !important;
+        }
     </style>
 </head>
 <body>
@@ -93,10 +101,10 @@
                         <img src="https://raw.githubusercontent.com/udistrital/prueba_piloto_funciones_lambda/develop/img/escudo_linea_negro.png"
                         alt="Escudo UD"
                         class="center-image"
-                        width="10px">
+                        width="8px">
                     </div>
                 </td>
-                <td class="bold text-center" colspan="7">
+                <td class="bold text-center" colspan="8">
                     <p class="bold text-center">
                         UNIVERSIDAD DISTRITAL <br>
                         FRANCISCO JOSÉ DE CALDAS
@@ -111,7 +119,7 @@
                 <td class="bold" colspan="2">
                     <p>FACULTAD:</p>
                 </td>
-                <td colspan="7">
+                <td colspan="8">
                     {{ nombre_facultad }}
                 </td>
             </tr>
@@ -125,26 +133,26 @@
                 <td class="bold text-center" colspan="2">
                     <p class="text-center">CÓDIGO PLAN DE ESTUDIOS:</p>
                 </td>
-                <td class="text-center" colspan="1">
+                <td class="text-center" colspan="2">
                     <p class="text-center">
                         {{ cod_plan_estudio }}
                     </p>
                 </td>
             </tr>
             <tr>
-                <td class="bold text-center" colspan="9">
+                <td class="bold text-center" colspan="10">
                     <p class="text-center">I. IDENTIFICACIÓN DEL ESPACIO ACADÉMICO</p>
                 </td>
             </tr>
             <tr>
-                <td class="bold table-header" colspan="9">
+                <td class="bold table-header" colspan="10">
                     <p>
                         NOMBRE DEL ESPACIO ACADÉMICO: {{ nombre_espacio_academico }}
                     </p>
                 </td>
             </tr>
             <tr>
-                <td colspan="3">
+                <td colspan="4">
                     <p>
                         Código del espacio académico:
                     </p>
@@ -166,7 +174,7 @@
                 </td>
             </tr>
             <tr>
-                <td colspan="3">
+                <td colspan="4">
                     <p>
                         Distribución horas de trabajo:
                     </p>
@@ -203,7 +211,7 @@
                 </td>
             </tr>
             <tr>
-                <td colspan="3">
+                <td colspan="4">
                     <p>
                         Tipo de espacio académico (X):
                     </p>
@@ -238,7 +246,7 @@
                 </td>
             </tr>
             <tr>
-                <td class="bold table-header text-center" colspan="9">
+                <td class="bold table-header text-center" colspan="10">
                     <p class="text-center">
                         NATURALEZA DEL ESPACIO ACADÉMICO (X):
                     </p>
@@ -257,7 +265,7 @@
                     </p>
                     {% endif %}
                 </td>
-                <td class="text-center" colspan="2">
+                <td class="text-center" colspan="1">
                     <p class="text-center">
                         Obligatorio Complementario
                     </p>
@@ -293,16 +301,28 @@
                     </p>
                     {% endif %}
                 </td>
+                <td class="text-center" colspan="1">
+                    <p class="text-center">
+                        Electivo
+                    </p>
+                </td>
+                <td class="text-center" colspan="1">
+                    {% if es_electivo %}
+                    <p class="text-center">
+                        X
+                    </p>
+                    {% endif %}
+                </td>
             </tr>
             <tr>
-                <td class="bold table-header text-center" colspan="9">
+                <td class="bold table-header text-center" colspan="10">
                     <p class="text-center">
                         CARÁCTER DEL ESPACIO ACADÉMICO (X):
                     </p>
                 </td>
             </tr>
             <tr>
-                <td class="text-center" colspan="1">
+                <td class="text-center" colspan="2">
                     <p class="text-center">
                         Teórico
                     </p>
@@ -314,7 +334,7 @@
                     </p>
                     {% endif %}
                 </td>
-                <td class="text-center" colspan="1">
+                <td class="text-center" colspan="2">
                     <p class="text-center">
                         Práctico
                     </p>
@@ -326,44 +346,21 @@
                     </p>
                     {% endif %}
                 </td>
-                <td class="text-center" colspan="1">
+                <td class="text-center" colspan="2">
                     <p class="text-center">
                         Teórico-Práctico
                     </p>
                 </td>
-                <td class="text-center" colspan="1">
+                <td class="text-center" colspan="2">
                     {% if es_teorico_practico %}
                     <p class="text-center">
                         X
                     </p>
                     {% endif %}
                 </td>
-                <td colspan="1">
-                    <p>
-                        Otros: (abrir desplegable)
-                    </p>
-                </td>
-                <td class="text-center" colspan="1">
-                    {% if otro_caracter_esp_academico %}
-                    <p class="text-center">
-                        X
-                    </p>
-                    {% endif %}
-                </td>
-                <td colspan="1">
-                    {% if cual_otro_caracter %}
-                    <p class="text-justify text-padding">
-                        Cuál: {{ cual_otro_caracter }}
-                    </p>
-                    {% else %}
-                    <p class="text-justify text-padding">
-                        Cuál:_______
-                    </p>
-                    {% endif %}
-                </td>
             </tr>
             <tr>
-                <td class="bold table-header text-center" colspan="9">
+                <td class="bold table-header text-center" colspan="10">
                     <p class="text-center">
                         MODALIDAD DE OFERTA DEL ESPACIO ACADÉMICO (X):
                     </p>
@@ -418,7 +415,7 @@
                     </p>
                     {% endif %}
                 </td>
-                <td colspan="1">
+                <td colspan="2">
                     {% if cual_otra_modalidad %}
                     <p class="text-justify text-padding">
                         Cuál: {{ cual_otra_modalidad }}
@@ -431,182 +428,363 @@
                 </td>
             </tr>
             <tr>
-                <td class="bold table-header text-center" colspan="9">
+                <td class="bold table-header text-center" colspan="10">
+                    <p class="text-center">
+                        IDIOMA EN EL QUE SE OFERTA EL ESPACIO ACADÉMICO:
+                    </p>
+                </td>
+            </tr>
+            <tr>
+                <td class="text-center" colspan="3">
+                    <p class="text-center">
+                        Idioma
+                    </p>
+                </td>
+                <td class="text-center" colspan="7">
+                    <p class="text-justify text-padding">
+                        {{ idiomas }}
+                    </p>
+                </td>
+            </tr>
+            <tr>
+                <td class="bold table-header text-center" colspan="10">
                     <p class="text-center">
                         II. SUGERENCIAS DE SABERES Y CONOCIMIENTOS PREVIOS
                     </p>
                 </td>
             </tr>
             <tr>
-                <td class="text-justify" colspan="9">
+                <td class="text-justify" colspan="10">
                     <p class="text-justify text-padding">
                         {{ sugerencias }}
                     </p>
                 </td>
             </tr>
             <tr>
-                <td class="bold table-header text-center" colspan="9">
+                <td class="bold table-header text-center" colspan="10">
                     <p class="text-center">
                         III. JUSTIFICACIÓN DEL ESPACIO ACADÉMICO
                     </p>
                 </td>
             </tr>
             <tr>
-                <td class="text-justify" colspan="9">
+                <td class="text-justify" colspan="10">
                     <p class="text-justify text-padding">
                         {{ justificacion }}
                     </p>
                 </td>
             </tr>
             <tr>
-                <td class="bold table-header text-center" colspan="9">
+                <td class="bold table-header text-center" colspan="10">
                     <p class="text-center">
                         IV. OBJETIVOS DEL ESPACIO ACADÉMICO (GENERAL Y ESPECÍFICOS)
                     </p>
                 </td>
             </tr>
             <tr>
-                <td class="text-justify" colspan="9">
+                <td class="text-justify without-border-bottom" colspan="10">
+                    <p class="text-justify text-padding bold">
+                        Objetivo General
+                    </p>
                     <p class="text-justify text-padding">
                         {{ objetivo_general }}
-                        <br> <br>
-                        {{ objetivos_especificos }}
                     </p>
+                    <br>
                 </td>
             </tr>
             <tr>
-                <td class="bold table-header text-center" colspan="9">
+                <td class="text-justify without-border-top" colspan="10">
+                    <p class="text-justify text-padding bold">
+                        Objetivos Específicos
+                    </p>
+                    {% if objetivos_especificos is iterable and (objetivos_especificos is not string and objetivos_especificos is not mapping) %}
+                    <p class="text-justify text-padding">
+                        <ul>
+                            {% for objetivo in objetivos_especificos %}
+                            <li> {{ objetivo }} </li>
+                            {% endfor %}
+                        </ul>
+                    </p>
+                    </p>
+                    {% else %}
+                    <p class="text-justify text-padding">
+                        {{ objetivos_especificos }}
+                    </p>
+                    {% endif %}
+                    <br>
+                </td>
+            </tr>
+            <tr>
+                <td class="bold table-header text-center" colspan="10">
                     <p class="text-center">
                         V. PROPÓSITOS DE FORMACIÓN Y DE APRENDIZAJE (PFA) DEL ESPACIO ACADEMICO
                     </p>
                 </td>
             </tr>
+            {% if propositos is string %}
             <tr>
-                <td class="text-justify" colspan="9">
-                    {% if propositos is iterable and (propositos is not string and propositos is not mapping) %}
-                    <table>
-                        <thead>
-                            <tr>
-                                <th class="text-center">#</th>
-                                <th class="text-center">PFA del programa / proyecto</th>
-                                <th class="text-center">PFA de la asignatura</th>
-                                <th class="text-center">Competencias</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for proposito in propositos %}
-                            <tr>
-                                <td class="text-center"> {{ loop.index }} </td>
-                                <td class="text-justify"> {{ proposito.pfa_programa }} </td>
-                                <td class="text-justify"> {{ proposito.pfa_asignatura }} </td>
-                                <td class="text-justify"> {{ proposito.competencias }} </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                    {% else %}
+                <td class="text-justify" colspan="10">
                     <p class="text-justify text-padding">
                         {{ propositos }}
                     </p>
-                    {% endif %}
-
                 </td>
             </tr>
+            {% endif %}
+        </table>
+        {% if propositos is iterable and (propositos is not string and propositos is not mapping) %}
+        <table>
+            <thead>
+                <tr>
+                    <th class="text-center">#</th>
+                    <th class="text-center">PFA del programa / proyecto</th>
+                    <th class="text-center">PFA de la asignatura</th>
+                    <th class="text-center">Competencias</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for proposito in propositos %}
+                <tr>
+                    <td class="text-center"> {{ loop.index }} </td>
+                    <td class="text-justify"> {{ proposito.pfa_programa }} </td>
+                    <td class="text-justify"> {{ proposito.pfa_asignatura }} </td>
+                    <td class="text-justify"> {{ proposito.competencias }} </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+        <table>
             <tr>
-                <td class="bold table-header text-center" colspan="9">
+                <td class="bold table-header text-center" colspan="10">
                     <p class="text-center">
                         VI. CONTENIDOS TEMÁTICOS
                     </p>
                 </td>
             </tr>
             <tr>
-                <td class="text-justify" colspan="9">
-                    <p class="text-justify text-padding">
-                        {{ contenido_tematico }}
+                <td class="text-justify without-border-bottom" colspan="10">
+                    <p class="text-justify text-padding bold">
+                        Descripción:
                     </p>
+                    <p class="text-justify text-padding">
+                        {{ contenido_tematico_descripcion }}
+                    </p>
+                    <br>
                 </td>
             </tr>
             <tr>
-                <td class="bold table-header text-center" colspan="9">
+                <td class="text-justify without-border-top" colspan="10">
+                    {% if contenido_tematico_detalle is iterable and (contenido_tematico_detalle is not string and contenido_tematico_detalle is not mapping) %}
+                    <p class="text-justify text-padding bold">
+                        Temas y subtemas:
+                    </p>
+                    <p class="text-justify text-padding">
+                        <ul>
+                            {% for tema in contenido_tematico_detalle %}
+                            <li> {{ tema.nombre }} </li>
+                                {% if tema.subtemas is iterable and (tema.subtemas is not string and tema.subtemas is not mapping) %}
+                                <ul>
+                                    {% for subtema in tema.subtemas %}
+                                    <li> {{ subtema }} </li>
+                                    {% endfor %}
+                                </ul>
+                                {% endif %}
+                            {% endfor %}
+                        </ul>
+                    </p>
+                    </p>
+                    {% else %}
+                    <p class="text-justify text-padding">
+                        {{ contenido_tematico_detalle }}
+                    </p>
+                    {% endif %}
+                    <br>
+                </td>
+            </tr>
+            <tr>
+                <td class="bold table-header text-center" colspan="10">
                     <p class="text-center">
                         VII. ESTRATEGIAS DE ENSEÑANZA QUE FAVORECEN EL APRENDIZAJE
                     </p>
                 </td>
             </tr>
             <tr>
-                <td class="text-justify" colspan="9">
+                <td class="text-justify without-border-top" colspan="10">
+                    {% if estrategias_ensenanza is iterable and (estrategias_ensenanza is not string and estrategias_ensenanza is not mapping) %}
+                    <p class="text-justify text-padding">
+                        <ul>
+                            {% for estrategia in estrategias_ensenanza %}
+                            <li> <strong>Nombre: </strong>{{ estrategia.nombre }} </li>
+                                <ul>
+                                    <li><strong>Descripción: </strong>{{ estrategia.descripcion }}</li>
+                                    <li><strong>Pertinencia: </strong>{{ estrategia.pertinencia }}</li>
+                                    <li><strong>Articulación: </strong>{{ estrategia.articulacion_ra }}</li>
+                                </ul>
+                            {% endfor %}
+                        </ul>
+                    </p>
+                    </p>
+                    {% else %}
                     <p class="text-justify text-padding">
                         {{ estrategias_ensenanza }}
                     </p>
+                    {% endif %}
+                    <br>
                 </td>
             </tr>
             <tr>
-                <td class="bold table-header text-center" colspan="9">
+                <td class="bold table-header text-center" colspan="10">
                     <p class="text-center">
                         VIII. EVALUACIÓN
                     </p>
                 </td>
             </tr>
             <tr>
-                <td class="text-justify" colspan="9">
+                <td class="text-justify without-border-bottom" colspan="10">
+                    <p class="text-justify text-padding bold">
+                        Descripción:
+                    </p>
                     <p class="text-justify text-padding">
-                        {{ evaluacion }}
+                        {{ evaluacion_descripcion }}
                     </p>
                 </td>
             </tr>
             <tr>
-                <td class="bold table-header text-center" colspan="9">
+                <td class="text-justify without-border-top" colspan="10">
+                    {% if evaluacion_detalle is iterable and (evaluacion_detalle is not string and evaluacion_detalle is not mapping) %}
+                    <p class="text-justify text-padding bold">
+                        Evaluaciones:
+                    </p>
+                    <p class="text-justify text-padding">
+                        <ul>
+                            {% for evaluacion in evaluacion_detalle %}
+                            <li> <strong>Nombre: </strong>{{ evaluacion.nombre }} </li>
+                                <ul>
+                                    <li> <strong>Estrategia: </strong>{{ evaluacion.estrategia }} </li>
+                                    <li> <strong>Momento: </strong>{{ evaluacion.momento }} </li>
+                                    <li> <strong>Porcentaje: </strong>{{ evaluacion.porcentaje }} </li>
+                                </ul>
+                            {% endfor %}
+                        </ul>
+                    </p>
+                    </p>
+                    {% else %}
+                    <p class="text-justify text-padding">
+                        {{ evaluacion_detalle }}
+                    </p>
+                    {% endif %}
+                    <br>
+                </td>
+            </tr>
+            <tr>
+                <td class="bold table-header text-center" colspan="10">
                     <p class="text-center">
                         IX. MEDIOS Y RECURSOS EDUCATIVOS
                     </p>
                 </td>
             </tr>
             <tr>
-                <td class="text-justify" colspan="9">
+                <td class="text-justify" colspan="10">
                     <p class="text-justify text-padding">
                         {{ medios_recursos }}
                     </p>
                 </td>
             </tr>
             <tr>
-                <td class="bold table-header text-center" colspan="9">
+                <td class="bold table-header text-center" colspan="10">
                     <p class="text-center">
                         X. PRÁCTICAS ACADÉMICAS - SALIDAS DE CAMPO
                     </p>
                 </td>
             </tr>
             <tr>
-                <td class="text-justify" colspan="9">
+                <td class="text-justify" colspan="10">
                     <p class="text-justify text-padding">
                         {{ practicas_salidas }}
                     </p>
                 </td>
             </tr>
             <tr>
-                <td class="bold table-header text-center" colspan="9">
+                <td class="bold table-header text-center" colspan="10">
                     <p class="text-center">
                         XI. BIBLIOGRAFÍA
                     </p>
                 </td>
             </tr>
             <tr>
-                <td class="text-justify" colspan="9">
+                <td class="text-justify without-border-bottom" colspan="10">
+                    {% if bibliografia_basica is iterable and (bibliografia_basica is not string and bibliografia_basica is not mapping) %}
+                    <p class="text-justify text-padding bold">
+                        Básicas
+                    </p>
                     <p class="text-justify text-padding">
-                        Básicas <br>
+                        <ul>
+                            {% for bibliografia in bibliografia_basica %}
+                            <li> {{ bibliografia }} </li>
+                            {% endfor %}
+                        </ul>
+                    </p>
+                    {% else %}
+                    <p class="text-justify text-padding bold">
+                        Básicas
+                    </p>
+                    <p class="text-justify text-padding">
                         {{ bibliografia_basica }}
                     </p>
-                    <p class="text-justify text-padding">
-                        Complementarias <br>
-                        {{ bibliografia_complementaria }}
-                    </p>
-                    <p class="text-justify text-padding">
-                        Páginas web <br>
-                        {{ bibliografia_paginas }}
-                    </p>
+                    {% endif %}
+                    <br>
                 </td>
             </tr>
             <tr>
-                <td class="bold table-header text-center" colspan="9">
+                <td class="text-justify without-border-top without-border-bottom" colspan="10">
+                    {% if bibliografia_complementaria is iterable and (bibliografia_complementaria is not string and bibliografia_complementaria is not mapping) %}
+                    <p class="text-justify text-padding bold">
+                        Complementarias
+                    </p>
+                    <p class="text-justify text-padding">
+                        <ul>
+                            {% for bibliografia in bibliografia_complementaria %}
+                            <li> {{ bibliografia }} </li>
+                            {% endfor %}
+                        </ul>
+                    </p>
+                    {% else %}
+                    <p class="text-justify text-padding bold">
+                        Complementarias
+                    </p>
+                    <p class="text-justify text-padding">
+                        {{ bibliografia_complementaria }}
+                    </p>
+                    {% endif %}
+                    <br>
+                </td>
+            </tr>
+            <tr>
+                <td class="text-justify without-border-top" colspan="10">
+                    {% if bibliografia_paginas is iterable and (bibliografia_paginas is not string and bibliografia_paginas is not mapping) %}
+                    <p class="text-justify text-padding bold">
+                        Páginas web
+                    </p>
+                    <p class="text-justify text-padding">
+                        <ul>
+                            {% for bibliografia in bibliografia_paginas %}
+                            <li> {{ bibliografia }} </li>
+                            {% endfor %}
+                        </ul>
+                    </p>
+                    {% else %}
+                    <p class="text-justify text-padding bold">
+                        Páginas web
+                    </p>
+                    <p class="text-justify text-padding">
+                        {{ bibliografia_paginas }}
+                    </p>
+                    {% endif %}
+                    <br>
+                </td>
+            </tr>
+            <tr>
+                <td class="bold table-header text-center" colspan="10">
                     <p class="text-center">
                         XII. SEGUIMIENTO Y ACTUALIZACIÓN DEL SYLLABUS
                     </p>
@@ -618,7 +796,7 @@
                         Fecha revisión por Consejo Curricular:
                     </p>
                 </td>
-                <td class="text-justify" colspan="6">
+                <td class="text-justify" colspan="7">
                     <p class="text-justify">
                         {{ fecha_rev_consejo }}
                     </p>
@@ -635,7 +813,7 @@
                         {{ fecha_aprob_consejo }}
                     </p>
                 </td>
-                <td class="text-justify" colspan="1">
+                <td class="text-justify" colspan="2">
                     <p class="text-justify">
                         Número de acta:
                     </p>

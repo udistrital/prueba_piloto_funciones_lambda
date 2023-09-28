@@ -38,11 +38,13 @@ class SyllabusModel(BaseModel):
     contenido: Optional[Dict] = None
     estrategias: Optional[List] = None
     evaluacion: Optional[Dict] = None
-    bibliografia: Optional[List] = None
-    seguimiento: Optional[List] = None
+    bibliografia: Optional[Dict] = None
+    seguimiento: Optional[Dict] = None
     sugerencias: Optional[str] = None
     recursos_educativos: Optional[str] = None
     practicas_academicas: Optional[str] = None
+    vigencia: Optional[Dict] = None
+    idioma_espacio_id: Optional[List] = None
     activo: bool = Field(default=True)
     fecha_modificacion: Optional[datetime] = Field(default=local_now())
 
@@ -92,6 +94,8 @@ def format_response(result, message: str, status_code: int, success: bool):
                 result["fecha_creacion"] = str(result["fecha_creacion"])
             if result.get("fecha_modificacion"):
                 result["fecha_modificacion"] = str(result["fecha_modificacion"])
+            if result.get("syllabus_code"):
+                result["syllabus_code"] = str(result["syllabus_code"])
 
             return {"statusCode": status_code,
                     "body": json.dumps({
@@ -123,9 +127,7 @@ def lambda_handler(event, context):
             client = connect_db_client()
             filter_ = {"_id": ObjectId(syllabus_id)}
             if client:
-                print("Connecting database ...")
                 syllabus_collection = client[str(SYLLABUS_CRUD_DB)]["syllabus"]
-                print("Connection database successful")
                 print("Updating syllabus")
                 result = syllabus_collection.update_one(
                     filter_,
@@ -149,6 +151,13 @@ def lambda_handler(event, context):
             return format_response(
                 {},
                 "Error updating syllabus!",
+                500,
+                False)
+        else:
+            print(error)
+            return format_response(
+                {},
+                "Error updating syllabus! Detail: Error in input data",
                 500,
                 False)
     except Exception as ex:
