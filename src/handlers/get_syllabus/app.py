@@ -2,8 +2,8 @@
 
 import json
 import os
+import uuid
 
-from bson import ObjectId
 from pymongo import MongoClient
 
 SYLLABUS_CRUD_HOST = os.environ.get('SYLLABUS_CRUD_HOST')
@@ -49,6 +49,10 @@ def format_response(result, message: str, status_code: int, success: bool):
                 result["_id"] = str(result["_id"])
             if result.get("fecha_creacion"):
                 result["fecha_creacion"] = str(result["fecha_creacion"])
+            if result.get("fecha_modificacion"):
+                result["fecha_modificacion"] = str(result["fecha_modificacion"])
+            if result.get("syllabus_code"):
+                result["syllabus_code"] = str(result["syllabus_code"])
 
             return {"statusCode": status_code,
                     "body": json.dumps({
@@ -69,21 +73,21 @@ def format_response(result, message: str, status_code: int, success: bool):
 def lambda_handler(event, context):
     client = None
     try:
-        syllabus_id = event["pathParameters"]["id"]
-        print(syllabus_id)
+        syllabus_code = event["pathParameters"]["id"]
+        print(syllabus_code)
         client = connect_db_client()
         if client:
-            print("Connecting database ...")
             syllabus_collection = client[str(SYLLABUS_CRUD_DB)]["syllabus"]
-            print("Connection database successful")
             syllabus = syllabus_collection.find_one({
-                "_id": ObjectId(syllabus_id)
+                "syllabus_code": uuid.UUID(syllabus_code),
+                "syllabus_actual": True
             })
             print(f"Consulted record.")
             if syllabus:
                 print("Syllabus found!")
                 print(syllabus)
                 print(type(syllabus))
+                close_connect_db(client)
                 return format_response(
                     syllabus,
                     "Syllabus OK",
@@ -92,17 +96,21 @@ def lambda_handler(event, context):
             else:
                 print("Syllabus not found!")
                 close_connect_db(client)
+                return format_response(
+                    {},
+                    "Syllabus Not Found",
+                    404,
+                    False)
         return format_response(
             {},
             "Error get syllabus!",
-            403,
+            500,
             False)
     except Exception as ex:
-        print("Error get syllabus")
-        print(f"Detail: {ex}")
+        print(f"Error get syllabus. Detail: {ex}")
         close_connect_db(client)
         return format_response(
             {},
-            "Error get syllabus!",
-            403,
+            f"Error get syllabus! Detail: {ex}",
+            500,
             False)

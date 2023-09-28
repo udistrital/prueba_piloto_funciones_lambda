@@ -2,6 +2,7 @@
 
 import json
 import os
+import uuid
 from datetime import datetime
 from typing import List, Dict, Optional
 
@@ -25,17 +26,27 @@ def local_now():
 
 
 class SyllabusModel(BaseModel):
+    syllabus_code: Optional[str] = None
+    version: Optional[int] = 0
+    syllabus_actual: Optional[bool] = False
     espacio_academico_id: int
-    justificacion: str
-    objetivo_general: str
-    objetivos_especificos: List
-    resultados_aprendizaje: List
-    articulacion_resultados_aprendizaje: str
-    contenido: Dict
-    estrategias: List
-    evaluacion: Dict
-    bibliografia: List
-    seguimiento: List
+    proyecto_curricular_id: int
+    plan_estudios_id: int
+    justificacion: Optional[str] = None
+    objetivo_general: Optional[str] = None
+    objetivos_especificos: Optional[List] = None
+    resultados_aprendizaje: Optional[List] = None
+    articulacion_resultados_aprendizaje: Optional[str] = None
+    contenido: Optional[Dict] = None
+    estrategias: Optional[List] = None
+    evaluacion: Optional[Dict] = None
+    bibliografia: Optional[Dict] = None
+    seguimiento: Optional[Dict] = None
+    sugerencias: Optional[str] = None
+    recursos_educativos: Optional[str] = None
+    practicas_academicas: Optional[str] = None
+    vigencia: Optional[Dict] = None
+    idioma_espacio_id: Optional[List] = None
     activo: bool = Field(default=True)
     fecha_creacion: datetime = Field(default=local_now())
     fecha_modificacion: Optional[datetime] = None
@@ -77,6 +88,38 @@ def parse_body(event) -> tuple:
         return None, ex
 
 
+def set_version(syllabus_data: dict, syllabus_collection):
+    try:
+        if syllabus_data.get("syllabus_code"):
+            syllabus_code = str(syllabus_data.get("syllabus_code"))
+            query = {
+                "syllabus_code": uuid.UUID(syllabus_code)
+            }
+            total = syllabus_collection.count_documents(query)
+            syllabus_data["version"] = total + 1
+        else:
+            syllabus_data["version"] = 1
+    except Exception as ex:
+        print(f"Error assigning version. Details:  {str(ex)}")
+
+
+def update_old_syllabus(syllabus_data: dict, syllabus_collection):
+    try:
+        if syllabus_data.get("syllabus_code"):
+            syllabus_code = str(syllabus_data.get("syllabus_code"))
+            query = {
+                "syllabus_code": uuid.UUID(syllabus_code)
+            }
+            syllabus_collection.update_many(
+                query,
+                {
+                    "$set": {"syllabus_actual": False}
+                }
+            )
+    except Exception as ex:
+        print(f"Error updating old syllabus. Details:  {str(ex)}")
+
+
 def format_response(result, message: str, status_code: int, success: bool):
     if isinstance(result, dict):
         if success:
@@ -84,6 +127,8 @@ def format_response(result, message: str, status_code: int, success: bool):
                 result["_id"] = str(result["_id"])
             if result.get("fecha_creacion"):
                 result["fecha_creacion"] = str(result["fecha_creacion"])
+            if result.get("syllabus_code"):
+                result["syllabus_code"] = str(result["syllabus_code"])
 
             return {"statusCode": status_code,
                     "body": json.dumps({
@@ -110,15 +155,22 @@ def lambda_handler(event, context):
             syllabus_data = SyllabusModel(**data).__dict__
             client = connect_db_client()
             if client:
-                print("Connecting database ...")
                 syllabus_collection = client[str(SYLLABUS_CRUD_DB)]["syllabus"]
-                print("Connection database successful")
+                if syllabus_data.get("syllabus_code"):
+                    syllabus_data["syllabus_code"] = uuid.UUID(syllabus_data.get("syllabus_code"))
+                else:
+                    syllabus_data["syllabus_code"] = uuid.uuid4()
+                set_version(syllabus_data, syllabus_collection)
+                update_old_syllabus(syllabus_data, syllabus_collection)
+
+                syllabus_data["syllabus_actual"] = True
                 print("Inserting new syllabus")
                 result = syllabus_collection.insert_one(syllabus_data)
                 print("Created new syllabus")
                 if result:
                     new_syllabus_id = result.inserted_id
                     new_syllabus = syllabus_collection.find_one(new_syllabus_id)
+                    close_connect_db(client)
                     return format_response(
                         new_syllabus,
                         "Created syllabus",
@@ -126,10 +178,22 @@ def lambda_handler(event, context):
                         True)
                 else:
                     close_connect_db(client)
+                    return format_response(
+                        {},
+                        "Syllabus was not created",
+                        400,
+                        False)
             return format_response(
                 {},
                 "Error registering new syllabus!",
-                403,
+                500,
+                False)
+        else:
+            print(error)
+            return format_response(
+                {},
+                "Error registering new syllabus! Detail: Error in input data",
+                500,
                 False)
     except Exception as ex:
         print("Error creating register syllabus")
@@ -137,6 +201,6 @@ def lambda_handler(event, context):
         close_connect_db(client)
         return format_response(
             {},
-            "Error registering new syllabus!",
-            403,
+            f"Error registering new syllabus! Detail: {ex}",
+            500,
             False)

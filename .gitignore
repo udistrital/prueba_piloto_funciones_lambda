@@ -1,3 +1,7 @@
 venv/
 
 .aws-sam/
+
+*__pycache__/
+
+*.toml

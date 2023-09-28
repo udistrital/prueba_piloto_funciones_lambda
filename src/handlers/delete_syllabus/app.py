@@ -86,9 +86,7 @@ def lambda_handler(event, context):
         client = connect_db_client()
         if client:
             filter_ = {"_id": ObjectId(syllabus_id)}
-            print("Connecting database ...")
             syllabus_collection = client[str(SYLLABUS_CRUD_DB)]["syllabus"]
-            print("Connection database successful")
             print("Deleting syllabus")
             result = syllabus_collection.update_one(
                 filter_,
@@ -102,15 +100,19 @@ def lambda_handler(event, context):
                 )
             else:
                 close_connect_db(client)
+                return format_delete_response(
+                    "Syllabus not deleted",
+                    400,
+                    False)
         return format_delete_response(
             "Error deleting syllabus!",
-            403,
+            500,
             False)
     except Exception as ex:
         print("Error updating syllabus")
         print(f"Detail: {ex}")
         close_connect_db(client)
         return format_delete_response(
-            "Error deleting syllabus!",
-            403,
+            f"Error deleting syllabus! {ex}",
+            500,
             False)

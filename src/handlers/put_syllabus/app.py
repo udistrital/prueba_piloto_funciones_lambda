@@ -22,21 +22,29 @@ print(SYLLABUS_CRUD_DB)
 
 
 def local_now():
+    print(TIMEZONE)
     return datetime.now(tz=pytz.timezone(TIMEZONE))
 
 
 class SyllabusModel(BaseModel):
     espacio_academico_id: int
-    justificacion: str
-    objetivo_general: str
-    objetivos_especificos: List
-    resultados_aprendizaje: List
-    articulacion_resultados_aprendizaje: str
-    contenido: Dict
-    estrategias: List
-    evaluacion: Dict
-    bibliografia: List
-    seguimiento: List
+    proyecto_curricular_id: int
+    plan_estudios_id: int
+    justificacion: Optional[str] = None
+    objetivo_general: Optional[str] = None
+    objetivos_especificos: Optional[List] = None
+    resultados_aprendizaje: Optional[List] = None
+    articulacion_resultados_aprendizaje: Optional[str] = None
+    contenido: Optional[Dict] = None
+    estrategias: Optional[List] = None
+    evaluacion: Optional[Dict] = None
+    bibliografia: Optional[Dict] = None
+    seguimiento: Optional[Dict] = None
+    sugerencias: Optional[str] = None
+    recursos_educativos: Optional[str] = None
+    practicas_academicas: Optional[str] = None
+    vigencia: Optional[Dict] = None
+    idioma_espacio_id: Optional[List] = None
     activo: bool = Field(default=True)
     fecha_modificacion: Optional[datetime] = Field(default=local_now())
 
@@ -86,6 +94,8 @@ def format_response(result, message: str, status_code: int, success: bool):
                 result["fecha_creacion"] = str(result["fecha_creacion"])
             if result.get("fecha_modificacion"):
                 result["fecha_modificacion"] = str(result["fecha_modificacion"])
+            if result.get("syllabus_code"):
+                result["syllabus_code"] = str(result["syllabus_code"])
 
             return {"statusCode": status_code,
                     "body": json.dumps({
@@ -112,20 +122,20 @@ def lambda_handler(event, context):
         if error is None:
             # Validate structure
             syllabus_data = SyllabusModel(**data).__dict__
+            syllabus_data["fecha_modificacion"] = local_now()
             print(syllabus_data)
             client = connect_db_client()
             filter_ = {"_id": ObjectId(syllabus_id)}
             if client:
-                print("Connecting database ...")
                 syllabus_collection = client[str(SYLLABUS_CRUD_DB)]["syllabus"]
-                print("Connection database successful")
                 print("Updating syllabus")
                 result = syllabus_collection.update_one(
                     filter_,
                     {"$set": syllabus_data})
-                print(f"Updated syllabus {syllabus_id}")
-                if result:
+                if result.modified_count:
+                    print(f"Updated syllabus {syllabus_id}")
                     syllabus = syllabus_collection.find_one(filter_)
+                    close_connect_db(client)
                     return format_response(
                         syllabus,
                         "Updated syllabus",
@@ -133,10 +143,22 @@ def lambda_handler(event, context):
                         True)
                 else:
                     close_connect_db(client)
+                    return format_response(
+                        {},
+                        "Syllabus not updated",
+                        400,
+                        False)
             return format_response(
                 {},
                 "Error updating syllabus!",
-                403,
+                500,
+                False)
+        else:
+            print(error)
+            return format_response(
+                {},
+                "Error updating syllabus! Detail: Error in input data",
+                500,
                 False)
     except Exception as ex:
         print("Error updating syllabus")
@@ -144,6 +166,6 @@ def lambda_handler(event, context):
         close_connect_db(client)
         return format_response(
             {},
-            "Error updating syllabus!",
-            403,
+            f"Error updating syllabus! Detail: {ex}",
+            500,
             False)
