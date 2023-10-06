@@ -145,7 +145,7 @@ Resources:
             Path: /syllabus/template
             Method: post
     Metadata:
-      DockerTag: latest
+      DockerTag: python3.9
       DockerContext: src/handlers/html_2_pdf
       Dockerfile: Dockerfile
 
