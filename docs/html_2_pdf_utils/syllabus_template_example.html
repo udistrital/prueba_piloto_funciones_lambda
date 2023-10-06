@@ -535,19 +535,19 @@
         <table>
             <thead>
                 <tr>
-                    <th class="text-center">#</th>
-                    <th class="text-center">PFA del programa / proyecto</th>
-                    <th class="text-center">PFA de la asignatura</th>
-                    <th class="text-center">Competencias</th>
+                    <th class="text-center" colspan="1">#</th>
+                    <th class="text-center" colspan="3">PFA del programa / proyecto</th>
+                    <th class="text-center" colspan="3">PFA de la asignatura</th>
+                    <th class="text-center" colspan="3">Competencias</th>
                 </tr>
             </thead>
             <tbody>
                 {% for proposito in propositos %}
                 <tr>
-                    <td class="text-center"> {{ loop.index }} </td>
-                    <td class="text-justify"> {{ proposito.pfa_programa }} </td>
-                    <td class="text-justify"> {{ proposito.pfa_asignatura }} </td>
-                    <td class="text-justify"> {{ proposito.competencias }} </td>
+                    <td class="text-center" colspan="1"> {{ loop.index }} </td>
+                    <td class="text-justify" colspan="3"> {{ proposito.pfa_programa }} </td>
+                    <td class="text-justify" colspan="3"> {{ proposito.pfa_asignatura }} </td>
+                    <td class="text-justify" colspan="3"> {{ proposito.competencias|default(' ', true) }} </td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -614,12 +614,7 @@
                     <p class="text-justify text-padding">
                         <ul>
                             {% for estrategia in estrategias_ensenanza %}
-                            <li> <strong>Nombre: </strong>{{ estrategia.nombre }} </li>
-                                <ul>
-                                    <li><strong>Descripción: </strong>{{ estrategia.descripcion }}</li>
-                                    <li><strong>Pertinencia: </strong>{{ estrategia.pertinencia }}</li>
-                                    <li><strong>Articulación: </strong>{{ estrategia.articulacion_ra }}</li>
-                                </ul>
+                            <li>{{ estrategia.descripcion|default(' ') }}</li>
                             {% endfor %}
                         </ul>
                     </p>
@@ -796,9 +791,19 @@
                         Fecha revisión por Consejo Curricular:
                     </p>
                 </td>
-                <td class="text-justify" colspan="7">
+                <td class="text-justify" colspan="3">
                     <p class="text-justify">
                         {{ fecha_rev_consejo }}
+                    </p>
+                </td>
+                <td class="text-justify" colspan="2">
+                    <p class="text-justify">
+                        Versión Syllabus:
+                    </p>
+                </td>
+                <td class="text-center" colspan="2">
+                    <p class="text-center">
+                        {{ version_syllabus }}
                     </p>
                 </td>
             </tr>
