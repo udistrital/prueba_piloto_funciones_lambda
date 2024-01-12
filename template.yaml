@@ -92,13 +92,28 @@ Resources:
       DockerContext: src/handlers/html_2_pdf
       Dockerfile: Dockerfile
 
+  PostSyllabusGofpdfFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/handlers/gofpdf_syllabus/
+      Handler: gofpdf_syllabus
+      Runtime: go1.x
+      Architectures:
+        - x86_64
+      Events:
+        GetSyllabusGofPdf:
+          Type: Api
+          Properties:
+            Path: /v2/syllabus/template
+            Method: post
 
   HealthFunction:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: src/handlers/health/
       Handler: app.lambda_handler
-      Runtime: python3.9
+      Runtime: python3.10
+      Timeout: 10
       Events:
         Health:
           Type: Api
