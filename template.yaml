@@ -31,10 +31,10 @@ Parameters:
     Default: "America/Bogota"
 
 Resources:
-  CreateSyllabusFunction:
+  CrudSyllabusFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: src/handlers/create_syllabus/
+      CodeUri: src/handlers/crud_syllabus/
       Handler: app.lambda_handler
       Runtime: python3.9
       Environment:
@@ -52,87 +52,30 @@ Resources:
             Path: /syllabus
             Method: post
 
-  GetSyllabusFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: src/handlers/get_syllabus/
-      Handler: app.lambda_handler
-      Runtime: python3.9
-      Environment:
-        Variables:
-          SYLLABUS_CRUD_HOST: !Ref CrudHost
-          SYLLABUS_CRUD_PORT: !Ref CrudPort
-          SYLLABUS_CRUD_USERNAME: !Ref CrudUsername
-          SYLLABUS_CRUD_PASS: !Ref CrudPass
-          SYLLABUS_CRUD_DB: !Ref CrudDB
-      Events:
         GetSyllabus:
           Type: Api
           Properties:
             Path: /syllabus/{id}
             Method: get
 
-  GetAllSyllabusFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: src/handlers/get_all_syllabus/
-      Handler: app.lambda_handler
-      Runtime: python3.9
-      Environment:
-        Variables:
-          SYLLABUS_CRUD_HOST: !Ref CrudHost
-          SYLLABUS_CRUD_PORT: !Ref CrudPort
-          SYLLABUS_CRUD_USERNAME: !Ref CrudUsername
-          SYLLABUS_CRUD_PASS: !Ref CrudPass
-          SYLLABUS_CRUD_DB: !Ref CrudDB
-      Events:
-        GetSyllabus:
+        GetAllSyllabus:
           Type: Api
           Properties:
             Path: /syllabus
             Method: get
 
-  PutSyllabusFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: src/handlers/put_syllabus/
-      Handler: app.lambda_handler
-      Runtime: python3.9
-      Environment:
-        Variables:
-          SYLLABUS_CRUD_HOST: !Ref CrudHost
-          SYLLABUS_CRUD_PORT: !Ref CrudPort
-          SYLLABUS_CRUD_USERNAME: !Ref CrudUsername
-          SYLLABUS_CRUD_PASS: !Ref CrudPass
-          SYLLABUS_CRUD_DB: !Ref CrudDB
-          TIMEZONE: !Ref Timezone
-      Events:
         PutSyllabus:
           Type: Api
           Properties:
             Path: /syllabus/{id}
             Method: put
 
-  DeleteSyllabusFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: src/handlers/delete_syllabus/
-      Handler: app.lambda_handler
-      Runtime: python3.9
-      Environment:
-        Variables:
-          SYLLABUS_CRUD_HOST: !Ref CrudHost
-          SYLLABUS_CRUD_PORT: !Ref CrudPort
-          SYLLABUS_CRUD_USERNAME: !Ref CrudUsername
-          SYLLABUS_CRUD_PASS: !Ref CrudPass
-          SYLLABUS_CRUD_DB: !Ref CrudDB
-          TIMEZONE: !Ref Timezone
-      Events:
         DeleteSyllabus:
           Type: Api
           Properties:
             Path: /syllabus/{id}
             Method: delete
+
 
   PostSyllabusPdfFunction:
     Type: AWS::Serverless::Function
@@ -149,13 +92,28 @@ Resources:
       DockerContext: src/handlers/html_2_pdf
       Dockerfile: Dockerfile
 
+  PostSyllabusGofpdfFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/handlers/gofpdf_syllabus/
+      Handler: gofpdf_syllabus
+      Runtime: go1.x
+      Architectures:
+        - x86_64
+      Events:
+        GetSyllabusGofPdf:
+          Type: Api
+          Properties:
+            Path: /v2/syllabus/template
+            Method: post
 
   HealthFunction:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: src/handlers/health/
       Handler: app.lambda_handler
-      Runtime: python3.9
+      Runtime: python3.10
+      Timeout: 10
       Events:
         Health:
           Type: Api
