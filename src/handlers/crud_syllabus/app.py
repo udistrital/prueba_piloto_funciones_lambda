@@ -40,8 +40,8 @@ class SyllabusModel(BaseModel):
     version: Optional[int] = 0
     syllabus_actual: Optional[bool] = False
     espacio_academico_id: int
-    proyecto_curricular_id: int
-    plan_estudios_id: int
+    proyecto_curricular_ids: List[int]
+    plan_estudios_ids: List[int]
     justificacion: Optional[str] = None
     objetivo_general: Optional[str] = None
     objetivos_especificos: Optional[List] = None
@@ -74,7 +74,6 @@ class DeleteSyllabusModel(BaseModel):
     fecha_modificacion: Optional[datetime] = Field(default=local_now())
 
 
-# Gestión de conexión con la BD
 def connect_db_client():
     """Genera el cliente para establecer la conexión con la base de datos"""
     try:
@@ -96,6 +95,7 @@ def connect_db_client():
 
 
 def close_connect_db(client):
+    """Permite cerrar la conexión a la base de datos en caso que la conexión exista"""
     try:
         print("Closing client DB")
         if client:
@@ -105,9 +105,11 @@ def close_connect_db(client):
         print(f"Detail: {ex}")
 
 
-# Deserialización de parámetros de entrada
-# parse_body -> body de las peticiones POST, PUT, DELETE
 def parse_body(event) -> tuple:
+    """
+    Deserialización de parámetros de entrada que tengan body.
+    Por ejemplo, peticiones POST, PUT o DELETE
+    """
     try:
         return json.loads(event["body"]), None
     except Exception as ex:
@@ -115,12 +117,23 @@ def parse_body(event) -> tuple:
 
 
 def get_query(query_str: str) -> dict:
+    """
+    Transforma el query string de entrada en un diccionario con filtros para
+    realizar la consulta a la base de datos
+    Ejemplo:
+        query=espacio_academico_id:1,proyecto_curricular_id:375, ...
+    """
     query_total = {}
     int_fields = ['version',
                   'espacio_academico_id',
                   'proyecto_curricular_id',
                   'plan_estudios_id'
                   ]
+    key_map = {
+        "proyecto_curricular_id": "proyecto_curricular_ids",
+        "plan_estudios_id": "plan_estudios_ids"
+    }
+    keys_map = list(key_map.keys())
     for cond in query_str.split(","):
         kv = cond.split(":", 1)
         if len(kv) == 2:
@@ -139,11 +152,25 @@ def get_query(query_str: str) -> dict:
                 v = ObjectId(v)
         else:
             k, v = kv[0], None
+
+        if k in keys_map:
+            k = key_map[k]
+            v = {
+                "$in": [v]
+            }
         query_total[k] = v
     return query_total
 
 
 def get_sort_by(query_params) -> list:
+    """
+    Transforma el query params sortby en la lista de consulta sort
+    para la base de datos combinando el sortby con el order (ASCENDENTE,
+    DESCENDENTE)
+    Ejemplo:
+        sortby=espacio_academico_id, ...
+        order=asc, ...
+    """
     sort_by_total = []
     if query_params.get("sortby"):
         sort_by_list = str(query_params.get("sortby")).split(",")
@@ -164,6 +191,10 @@ def get_sort_by(query_params) -> list:
 
 
 def parse_query_params(event) -> tuple:
+    """
+    Organiza los query params query, fields, sortby, order, limit, offset generando
+    la estructura para realizar la consulta a base de datos
+    """
     try:
         print("event: ", event)
         query_params_result = {
@@ -201,8 +232,10 @@ def parse_query_params(event) -> tuple:
         return {}, ex
 
 
-# Gestión de versiones
 def set_version(syllabus_data: dict, syllabus_collection):
+    """
+    Calcula el versionado de los syllabus por syllabus_code
+    """
     try:
         if syllabus_data.get("syllabus_code"):
             syllabus_code = str(syllabus_data.get("syllabus_code"))
@@ -236,6 +269,14 @@ def update_old_syllabus(syllabus_data: dict, syllabus_collection):
 
 # Formato de respuestas
 def format_specific_values(result):
+    """
+    Convierte valores con tipo de dato específico a un formato que
+    pueda ser respondido como JSON.
+    Ejemplo:
+        ObjectId -> str
+        datetime -> str
+        UUID -> str
+    """
     if result.get("_id"):
         result["_id"] = str(result["_id"])
     if result.get("fecha_creacion"):
@@ -248,6 +289,16 @@ def format_specific_values(result):
 
 
 def format_response(result, message: str, status_code: int, success: bool):
+    """
+    Crea la estructura de respuesta con los campos:
+        statusCode: código HTTP
+        body: JSON con la siguiente estructura
+            Success: Campo booleano que indica si fue exitosa (true) o no la petición
+            Status: código HTTP
+            Message: mensaje descriptivo del resultado de la petición
+            Data: No es agregado en caso de un error en las peticiones, contiene una lista
+                o diccionario con el resultado de la petición entrante.
+    """
     if isinstance(result, dict):
         if success:
             result = format_specific_values(result)
