@@ -10,7 +10,7 @@ from typing import List, Dict, Optional
 import pytz
 from bson import ObjectId
 from pydantic import BaseModel, Field
-from pymongo import MongoClient, ASCENDING, DESCENDING
+from pymongo import MongoClient, ASCENDING, DESCENDING, errors
 
 # Required environment variables
 SYLLABUS_CRUD_HOST = os.environ.get('SYLLABUS_CRUD_HOST')
@@ -57,6 +57,7 @@ class SyllabusModel(BaseModel):
     practicas_academicas: Optional[str] = None
     vigencia: Optional[Dict] = None
     idioma_espacio_id: Optional[List] = None
+    tercero_id: Optional[int] = 0
     activo: bool = Field(default=True)
 
 
@@ -380,12 +381,28 @@ def create_syllabus(syllabus_data, syllabus_collection):
                 "Syllabus was not created",
                 400,
                 False)
+    except errors.NetworkTimeout as nex:
+        print("Error querying all syllabus")
+        print(f"Detail: {nex}")
+        return format_response(
+            {},
+            "Error registering new syllabus! Detail: Network Timeout",
+            500,
+            False)
+    except errors.ServerSelectionTimeoutError as sst_err:
+        print("Error querying all syllabus")
+        print(f"Detail: {sst_err}")
+        return format_response(
+            {},
+            "Error registering new syllabus! Detail: Server Selection Timeout Error",
+            500,
+            False)
     except Exception as ex:
         print("Error creating register syllabus")
         print(f"Detail: {ex}")
         return format_response(
             {},
-            f"Error registering new syllabus! Detail: {ex}",
+            "Error registering new syllabus! Detail: general error, for more details check the logs",
             500,
             False)
 
@@ -411,12 +428,28 @@ def update_syllabus(syllabus_id, syllabus_data, syllabus_collection):
                 "Syllabus not updated",
                 400,
                 False)
+    except errors.NetworkTimeout as nex:
+        print("Error querying all syllabus")
+        print(f"Detail: {nex}")
+        return format_response(
+            {},
+            "Error updating syllabus! Detail: Network Timeout",
+            500,
+            False)
+    except errors.ServerSelectionTimeoutError as sst_err:
+        print("Error querying all syllabus")
+        print(f"Detail: {sst_err}")
+        return format_response(
+            {},
+            "Error updating syllabus! Detail: Server Selection Timeout Error",
+            500,
+            False)
     except Exception as ex:
         print("Error updating syllabus")
         print(f"Detail: {ex}")
         return format_response(
             {},
-            f"Error updating syllabus! Detail: {ex}",
+            "Error updating syllabus! Detail: general error, for more details check the logs",
             500,
             False)
 
@@ -442,12 +475,28 @@ def delete_syllabus(syllabus_id, syllabus_data, syllabus_collection):
                 "Syllabus not deleted",
                 400,
                 False)
+    except errors.NetworkTimeout as nex:
+        print("Error querying all syllabus")
+        print(f"Detail: {nex}")
+        return format_response(
+            {},
+            "Error deleting syllabus! Detail: Network Timeout",
+            500,
+            False)
+    except errors.ServerSelectionTimeoutError as sst_err:
+        print("Error querying all syllabus")
+        print(f"Detail: {sst_err}")
+        return format_response(
+            {},
+            "Error deleting syllabus! Detail: Server Selection Timeout Error",
+            500,
+            False)
     except Exception as ex:
         print("Error deleting syllabus")
         print(f"Detail: {ex}")
         return format_response(
             {},
-            f"Error deleting syllabus! Detail: {ex}",
+            "Error deleting syllabus! Detail: general error, for more details check the logs",
             500,
             False)
 
@@ -472,12 +521,28 @@ def get_all_syllabus(query_complement, syllabus_collection):
                 "Request successful",
                 200,
                 True)
+    except errors.NetworkTimeout as nex:
+        print("Error querying all syllabus")
+        print(f"Detail: {nex}")
+        return format_response(
+            {},
+            "Error querying all syllabus! Detail: Network Timeout",
+            500,
+            False)
+    except errors.ServerSelectionTimeoutError as sst_err:
+        print("Error querying all syllabus")
+        print(f"Detail: {sst_err}")
+        return format_response(
+            {},
+            "Error querying all syllabus! Detail: Server Selection Timeout Error",
+            500,
+            False)
     except Exception as ex:
-        print("Error deleting syllabus")
+        print("Error querying all syllabus")
         print(f"Detail: {ex}")
         return format_response(
             {},
-            f"Error deleting syllabus! Detail: {ex}",
+            "Error querying all syllabus! Detail: general error, for more details check the logs",
             500,
             False)
 
@@ -506,11 +571,11 @@ def get_one_syllabus(syllabus_code, syllabus_collection):
                 404,
                 False)
     except Exception as ex:
-        print("Error deleting syllabus")
+        print("Error querying a syllabus")
         print(f"Detail: {ex}")
         return format_response(
             {},
-            f"Error deleting syllabus! Detail: {ex}",
+            "Error querying a syllabus! Detail: general error, for more details check the logs",
             500,
             False)
 
