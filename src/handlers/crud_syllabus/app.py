@@ -614,6 +614,7 @@ def lambda_handler(event, context):
                 # Validate structure
                 syllabus_id = event["pathParameters"]["id"]
                 syllabus_data = SyllabusUpdateModel(**data).__dict__
+                syllabus_data["syllabus_code"] = uuid.UUID(syllabus_data["syllabus_code"])
                 syllabus_data["fecha_modificacion"] = local_now()
                 client = connect_db_client()
                 if client:
