@@ -823,6 +823,18 @@ func mainSpaceData(pdf *gofpdf.Fpdf, pageStyle PageStyle, data map[string]any) {
 	pdf.CellFormat(pageStyle.WC*2, 9, tr(fmt.Sprintf("%v", codPlan)),
 		"LBR", 1, "CM", false, 0, "")
 
+	pdf.SetFooterFunc(func() {
+		tr := pdf.UnicodeTranslatorFromDescriptor("")
+		pdf.SetY(-15)
+		pdf.SetX(pageStyle.ML)
+		pdf.SetFont("Helvetica", "I", 7)
+
+		footerWidth := pageStyle.WC * 10
+
+		pdf.MultiCell(footerWidth, 3, tr(`Estimada y estimado estudiante, si usted es una persona con discapacidad o cree que podría tener un problema dificultad o necesidad de aprendizaje y que requiere apoyos para cursar esta asignatura, por favor ponerse en contacto con el Centro Acacia al correo: cadep.acacia@udistrital.edu.co, o al teléfono: 601 3239300 Extensión 6213`),
+			"", "C", false)
+	})
+
 	identificationSection(pdf, pageStyle, data)
 	suggestionsSection(pdf, pageStyle, data)
 	justificationSection(pdf, pageStyle, data)
@@ -851,7 +863,7 @@ func createTemplate(data map[string]any) (map[string]any, int) {
 	marginLR := 8.0
 	pdf.AddPage()
 	pdf.SetMargins(marginLR, marginTB, marginLR)
-	pdf.SetAutoPageBreak(true, 8.0)
+	pdf.SetAutoPageBreak(true, 17)
 
 	pageStyle := getPageStyle(pdf)
 	pageStyle.WC = pageStyle.WW / 10
