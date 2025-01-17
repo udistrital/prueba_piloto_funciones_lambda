@@ -76,22 +76,6 @@ Resources:
             Path: /syllabus/{id}
             Method: delete
 
-
-  PostSyllabusPdfFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      PackageType: Image
-      Events:
-        GetSyllabusPdf:
-          Type: Api
-          Properties:
-            Path: /syllabus/template
-            Method: post
-    Metadata:
-      DockerTag: python3.9
-      DockerContext: src/handlers/html_2_pdf
-      Dockerfile: Dockerfile
-
   PostSyllabusGofpdfFunction:
     Type: AWS::Serverless::Function
     Properties:
