@@ -1,0 +1,15 @@
+kind: pipeline
+name: oati_sam_build
+
+steps:
+- steps:
+  name: sam_build
+  image: plugins/aws-sam-build
+  settings:
+    template_file_path: template.yaml
+    build_command_options: "--debug"
+  when:
+  branch:
+    - master
+  event:
+    - push
