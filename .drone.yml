@@ -2,13 +2,13 @@ kind: pipeline
 name: oati_sam_build
 
 steps:
-  name: sam_build
-  image: amazon/aws-sam-cli-emulation-image-python3.9
-  commands:
-    - echo "Building SAM Application"
-    - sam build
-  when:
-  branch:
-    - master
-  event:
-    - push
+  - name: sam_build
+    image: amazon/aws-sam-cli-emulation-image-python3.9
+    commands:
+      - echo "Building SAM Application"
+      - sam build
+    when:
+    branch:
+      - master
+    event:
+      - push
