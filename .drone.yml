@@ -6,7 +6,9 @@ steps:
     image: amazon/aws-sam-cli-emulation-image-python3.9
     commands:
       - echo "Building SAM Application"
-      - sam --vesion
+      - echo $PATH
+      - which sam
+      # - sam --vesion
     when:
       branch:
         - master
