@@ -3,12 +3,12 @@ name: oati_sam_build
 
 steps:
   - name: sam_build
-    image: amazon/aws-sam-cli-build-image-provided
+    image: amazon/aws-sam-cli-emulation-image-python3.9
     commands:
       - echo "Building SAM Application"
-      - sam build
+      - sam --vesion
     when:
-    branch:
-      - master
-    event:
-      - push
+      branch:
+        - master
+      event:
+        - push
