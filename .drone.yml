@@ -2,12 +2,11 @@ kind: pipeline
 name: oati_sam_build
 
 steps:
-- steps:
   name: sam_build
-  image: plugins/aws-sam-build
-  settings:
-    template_file_path: template.yaml
-    build_command_options: "--debug"
+  image: amazon/aws-sam-cli-emulation-image-python3.9
+  commands:
+    - echo "Building SAM Application"
+    - sam build
   when:
   branch:
     - master
