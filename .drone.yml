@@ -7,8 +7,10 @@ steps:
     commands:
       - echo "Building SAM Application"
       - echo $PATH
-      - which sam
-      # - sam --vesion
+      - echo "Adding /usr/local/opt/sam-cli/bin to PATH"
+      - export PATH=$PATH:/usr/local/opt/sam-cli/bin
+      - echo $PATH
+      - sam --vesion
     when:
       branch:
         - master
