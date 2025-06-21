@@ -2,22 +2,7 @@ kind: pipeline
 name: oati_sam_build
 
 steps:
-  - name: sam_build
-    image: amazon/aws-sam-cli-emulation-image-python3.9
-    commands:
-      - echo "Building SAM Application"
-      - echo $PATH
-      - echo "Adding /usr/local/opt/sam-cli/bin to PATH"
-      - export PATH=$PATH:/usr/local/opt/sam-cli/bin
-      - echo $PATH
-      - sam --vesion
-    when:
-      branch:
-        - master
-      event:
-        - push
-
-  - name: install sam-cli manually
+  - name: install sam-cli
     image: amazonlinux:2
     commands:
       - echo "Installing SAM CLI"
