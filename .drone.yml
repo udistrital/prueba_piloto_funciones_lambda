@@ -2,17 +2,13 @@ kind: pipeline
 name: oati_sam_build
 
 steps:
-  - name: sam_build
-    image: amazon/aws-sam-cli-emulation-image-python3.9
+  - name: install sam-cli
+    image: amazonlinux:2
     commands:
-      - echo "Building SAM Application"
-      - echo $PATH
-      - echo "Adding /usr/local/opt/sam-cli/bin to PATH"
-      - export PATH=$PATH:/usr/local/opt/sam-cli/bin
-      - echo $PATH
-      - sam --vesion
-    when:
-      branch:
-        - master
-      event:
-        - push
+      - echo "Installing SAM CLI"
+      - yum update -y
+      - yum install -y unzip curl
+      - curl -L "https://github.com/aws/aws-sam-cli/releases/latest/download/aws-sam-cli-linux-x86_64.zip" -o "aws-sam-cli-linux-x86_64.zip"
+      - unzip aws-sam-cli-linux-x86_64.zip -d sam-installation
+      - sudo ./sam-installation/install
+      - sam --version
