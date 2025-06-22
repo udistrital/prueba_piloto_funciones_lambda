@@ -6,6 +6,7 @@ steps:
     image: amazonlinux:2
     commands:
       - echo "Installing SAM CLI"
+      - ln -s /usr/bin/python3.9 /usr/bin/python
       - yum update -y
       - yum install -y unzip curl
       - curl -L "https://github.com/aws/aws-sam-cli/releases/latest/download/aws-sam-cli-linux-x86_64.zip" -o "aws-sam-cli-linux-x86_64.zip"
