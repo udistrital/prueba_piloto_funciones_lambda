@@ -2,21 +2,20 @@ kind: pipeline
 name: oati_sam_build
 
 steps:
-- steps:
-  name: sam_build
-  image: plugins/aws-sam-build
-  volumes:
-    - name: dockersock
-      path: /var/run/docker.sock
-  settings:
-    template_file_path: template.yaml
-    build_command_options: "--debug"
-    build_image: public.ecr.aws/sam/build-python3.9:1.112.0-20240313001230
-  when:
-  branch:
-    - master
-  event:
-    - push
+  - name: install sam-cli
+    image: amazonlinux:2
+    volumes:
+      - name: dockersock
+        path: /var/run/docker.sock
+    commands:
+      - echo "Installing SAM CLI"
+      - yum update -y
+      - yum install -y unzip curl
+      - curl -L "https://github.com/aws/aws-sam-cli/releases/latest/download/aws-sam-cli-linux-x86_64.zip" -o "aws-sam-cli-linux-x86_64.zip"
+      - unzip aws-sam-cli-linux-x86_64.zip -d sam-installation
+      - ./sam-installation/install
+      - sam --version
+      - sam build --use-container
 
 volumes:
   - name: dockersock
