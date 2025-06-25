@@ -5,6 +5,9 @@ steps:
 - steps:
   name: sam_build
   image: plugins/aws-sam-build
+  volumes:
+    - name: dockersock
+      path: /var/run/docker.sock
   settings:
     template_file_path: template.yaml
     build_command_options: "--debug"
@@ -14,3 +17,8 @@ steps:
     - master
   event:
     - push
+
+volumes:
+  - name: dockersock
+    host:
+      path: /var/run/docker.sock
