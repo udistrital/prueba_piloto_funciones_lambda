@@ -11,7 +11,7 @@ steps:
   settings:
     template_file_path: template.yaml
     build_command_options: "--debug"
-    build_image: amazon/aws-sam-cli-emulation-image-python3.9
+    build_image: public.ecr.aws/sam/build-python3.9:1.112.0-20240313001230
   when:
   branch:
     - master
