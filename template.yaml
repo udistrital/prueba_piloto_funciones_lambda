@@ -10,22 +10,13 @@ Globals:
     Timeout: 60
 
 Parameters:
-  CrudUsername:
-    Description: Database User Username
+  Environment:
     Type: String
-    Default: ""
-  CrudPass:
-    Type: String
-    Default: ""
-  CrudHost:
-    Type: String
-    Default: ""
-  CrudPort:
-    Type: String
-    Default: ""
-  CrudDB:
-    Type: String
-    Default: "prueba_piloto_lambda_db"
+    Default: preprod
+    AllowedValues:
+      - preprod
+      - prod
+    Description: Environment name used for parameter store path prefixes
   Timezone:
     Type: String
     Default: "America/Bogota"
@@ -39,11 +30,7 @@ Resources:
       Runtime: python3.9
       Environment:
         Variables:
-          SYLLABUS_CRUD_HOST: !Ref CrudHost
-          SYLLABUS_CRUD_PORT: !Ref CrudPort
-          SYLLABUS_CRUD_USERNAME: !Ref CrudUsername
-          SYLLABUS_CRUD_PASS: !Ref CrudPass
-          SYLLABUS_CRUD_DB: !Ref CrudDB
+          ENVIRONMENT: !Ref Environment
           TIMEZONE: !Ref Timezone
       Events:
         CreateSyllabus:

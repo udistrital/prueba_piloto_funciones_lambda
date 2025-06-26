@@ -8,25 +8,20 @@ from datetime import datetime
 from typing import List, Dict, Optional
 
 import pytz
+import boto3
 from bson import ObjectId
 from pydantic import BaseModel, Field
 from pymongo import MongoClient, ASCENDING, DESCENDING, errors
 
 # Required environment variables
-SYLLABUS_CRUD_HOST = os.environ.get('SYLLABUS_CRUD_HOST')
-SYLLABUS_CRUD_PORT = os.environ.get('SYLLABUS_CRUD_PORT')
-SYLLABUS_CRUD_USERNAME = os.environ.get('SYLLABUS_CRUD_USERNAME')
-SYLLABUS_CRUD_PASS = os.environ.get('SYLLABUS_CRUD_PASS')
-SYLLABUS_CRUD_DB = os.environ.get('SYLLABUS_CRUD_DB')
 TIMEZONE = os.environ.get('TIMEZONE')
 COLLECTION = "syllabus"
-print(SYLLABUS_CRUD_DB)
+_PARAMETERS = None
 
 ORDER_LABEL = {
     "desc": DESCENDING,
     "asc": ASCENDING
 }
-
 
 # Modelo de datos Syllabus
 def local_now():
@@ -75,16 +70,60 @@ class DeleteSyllabusModel(BaseModel):
     fecha_modificacion: Optional[datetime] = Field(default=local_now())
 
 
+def get_parameters():
+    """Retrieve parameters from AWS Parameter Store with caching"""
+    global _PARAMETERS
+
+    # Return cached parameters if available
+    if _PARAMETERS is not None:
+        return _PARAMETERS
+
+    environment = os.environ.get('ENVIRONMENT')
+    param_prefix = f"/{environment}/syllabus_crud_lambda"
+
+    try:
+        # Initialize SSM client
+        ssm = boto3.client('ssm')
+
+        parameter_names = [
+            f"{param_prefix}/db/host",
+            f"{param_prefix}/db/port",
+            f"{param_prefix}/db/dbname",
+            f"{param_prefix}/db/username",
+            f"{param_prefix}/db/password"
+        ]
+
+        # Get parameters from Parameter Store
+        response = ssm.get_parameters(
+            Names=parameter_names,
+            WithDecryption=True
+        )
+
+        # Create a dictionary of parameters
+        params = {}
+        for param in response['Parameters']:
+            name = param['Name'].split('/')[-1]
+            params[name] = param['Value']
+
+        # Cache the parameters
+        _PARAMETERS = params
+
+        return params
+    except Exception as e:
+        print(f"Error retrieving parameters: {str(e)}")
+        raise
+
 def connect_db_client():
+    parameters = get_parameters()
     """Genera el cliente para establecer la conexión con la base de datos"""
     try:
         # With password
-        if SYLLABUS_CRUD_USERNAME and SYLLABUS_CRUD_PASS:
-            uri = f"mongodb://{SYLLABUS_CRUD_USERNAME}:{SYLLABUS_CRUD_PASS}@" \
-                  f"{SYLLABUS_CRUD_HOST}:{SYLLABUS_CRUD_PORT}/"
+        if parameters['username'] and parameters['password']:
+            uri = f"mongodb://{parameters['username']}:{parameters['password']}@" \
+                  f"{parameters['host']}:{parameters['port']}/"
         else:
             # Without password
-            uri = f"mongodb://{SYLLABUS_CRUD_HOST}:{SYLLABUS_CRUD_PORT}/"
+            uri = f"mongodb://{parameters['host']}:{parameters['port']}/"
 
         client = MongoClient(uri, uuidRepresentation='standard')
         print("Client DB Successful")
@@ -591,7 +630,7 @@ def lambda_handler(event, context):
                 syllabus_data = SyllabusCreationModel(**data).__dict__
                 client = connect_db_client()
                 if client:
-                    syllabus_collection = client[str(SYLLABUS_CRUD_DB)]["syllabus"]
+                    syllabus_collection = client[str(_PARAMETERS['dbname'])]["syllabus"]
                     response = create_syllabus(syllabus_data, syllabus_collection)
                     close_connect_db(client)
                     return response
@@ -618,7 +657,7 @@ def lambda_handler(event, context):
                 syllabus_data["fecha_modificacion"] = local_now()
                 client = connect_db_client()
                 if client:
-                    syllabus_collection = client[str(SYLLABUS_CRUD_DB)]["syllabus"]
+                    syllabus_collection = client[str(_PARAMETERS['dbname'])]["syllabus"]
                     response = update_syllabus(syllabus_id, syllabus_data, syllabus_collection)
                     close_connect_db(client)
                     return response
@@ -642,7 +681,7 @@ def lambda_handler(event, context):
             syllabus_data = DeleteSyllabusModel().__dict__
             client = connect_db_client()
             if client:
-                syllabus_collection = client[str(SYLLABUS_CRUD_DB)]["syllabus"]
+                syllabus_collection = client[str(_PARAMETERS['dbname'])]["syllabus"]
                 response = delete_syllabus(syllabus_id, syllabus_data, syllabus_collection)
                 close_connect_db(client)
                 return response
@@ -655,7 +694,7 @@ def lambda_handler(event, context):
         elif http_method == 'GET':
             client = connect_db_client()
             if client:
-                syllabus_collection = client[str(SYLLABUS_CRUD_DB)]["syllabus"]
+                syllabus_collection = client[str(_PARAMETERS['dbname'])]["syllabus"]
                 if 'pathParameters' in event and event['pathParameters'] is not None:
                     syllabus_code = event["pathParameters"]["id"]
                     print(syllabus_code)
