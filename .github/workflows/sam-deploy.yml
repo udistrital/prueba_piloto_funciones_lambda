@@ -30,6 +30,7 @@ jobs:
           sam deploy \
             --stack-name ${{ env.STACK_NAME }} \
             --no-confirm-changeset \
-            --no-fail-on-empty-changeset \
+            --no-execute-changeset \
             --resolve-s3 \
             --parameter-overrides Environment=${{ env.ENVIRONMENT }}
+            --capabilities CAPABILITY_IAM
