@@ -10,13 +10,22 @@ Globals:
     Timeout: 60
 
 Parameters:
-  Environment:
+  CrudUsername:
+    Description: Database User Username
     Type: String
-    Default: preprod
-    AllowedValues:
-      - preprod
-      - prod
-    Description: Environment name used for parameter store path prefixes
+    Default: ""
+  CrudPass:
+    Type: String
+    Default: ""
+  CrudHost:
+    Type: String
+    Default: ""
+  CrudPort:
+    Type: String
+    Default: ""
+  CrudDB:
+    Type: String
+    Default: ""
   Timezone:
     Type: String
     Default: "America/Bogota"
@@ -28,9 +37,19 @@ Resources:
       CodeUri: src/handlers/crud_syllabus/
       Handler: app.lambda_handler
       Runtime: python3.9
+      VpcConfig:
+        SecurityGroupIds:
+          - sg-0ebc920d35b5e46a3
+        SubnetIds:
+          - subnet-2771567f
+          - subnet-43b19769
       Environment:
         Variables:
-          ENVIRONMENT: !Ref Environment
+          SYLLABUS_CRUD_HOST: !Ref CrudHost
+          SYLLABUS_CRUD_PORT: !Ref CrudPort
+          SYLLABUS_CRUD_USERNAME: !Ref CrudUsername
+          SYLLABUS_CRUD_PASS: !Ref CrudPass
+          SYLLABUS_CRUD_DB: !Ref CrudDB
           TIMEZONE: !Ref Timezone
       Events:
         CreateSyllabus:

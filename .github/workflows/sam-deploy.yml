@@ -26,11 +26,16 @@ jobs:
             echo "STACK_NAME=pruebas-dos-syllabus" >> $GITHUB_ENV
           fi
       - run: sam build --use-container
-      -  run: |
+      - run: |
           sam deploy \
             --stack-name ${{ env.STACK_NAME }} \
             --no-confirm-changeset \
             --no-execute-changeset \
             --resolve-s3 \
-            --parameter-overrides Environment=${{ env.ENVIRONMENT }}
+            --parameter-overrides \
+              CrudHost="${{ env.DB_HOST }}" \
+              CrudPort="${{ env.DB_PORT }}" \
+              CrudUsername="${{ env.DB_USERNAME }}" \
+              CrudPass="${{ env.DB_PASSWORD }}" \
+              CrudDB="${{ env.DB_DBNAME }}" \
             --capabilities CAPABILITY_IAM
