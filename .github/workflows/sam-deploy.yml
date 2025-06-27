@@ -40,7 +40,6 @@ jobs:
           sam deploy \
             --stack-name ${{ env.STACK_NAME }} \
             --no-confirm-changeset \
-            --no-execute-changeset \
             --no-fail-on-empty-changeset \
             --resolve-s3 \
             --parameter-overrides \
