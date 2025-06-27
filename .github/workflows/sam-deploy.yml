@@ -21,9 +21,19 @@ jobs:
           if [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
             echo "ENVIRONMENT=prod" >> $GITHUB_ENV
             echo "STACK_NAME=syllabus-produccion" >> $GITHUB_ENV
+            echo "DB_HOST=${{ secrets.DB_HOST_MASTER }}" >> $GITHUB_ENV
+            echo "DB_PORT=${{ secrets.DB_PORT_MASTER }}" >> $GITHUB_ENV
+            echo "DB_USERNAME=${{ secrets.DB_USERNAME_MASTER }}" >> $GITHUB_ENV
+            echo "DB_PASSWORD=${{ secrets.DB_PASSWORD_MASTER }}" >> $GITHUB_ENV
+            echo "DB_DBNAME=${{ secrets.DB_DBNAME_MASTER }}" >> $GITHUB_ENV
           else
             echo "ENVIRONMENT=preprod" >> $GITHUB_ENV
             echo "STACK_NAME=pruebas-dos-syllabus" >> $GITHUB_ENV
+            echo "DB_HOST=${{ secrets.DB_HOST_TEST }}" >> $GITHUB_ENV
+            echo "DB_PORT=${{ secrets.DB_PORT_TEST }}" >> $GITHUB_ENV
+            echo "DB_USERNAME=${{ secrets.DB_USERNAME_TEST }}" >> $GITHUB_ENV
+            echo "DB_PASSWORD=${{ secrets.DB_PASSWORD_TEST }}" >> $GITHUB_ENV
+            echo "DB_DBNAME=${{ secrets.DB_DBNAME_TEST }}" >> $GITHUB_ENV
           fi
       - run: sam build --use-container
       - run: |
