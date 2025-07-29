@@ -5,7 +5,7 @@ import json
 import os
 import uuid
 from datetime import datetime
-from typing import List, Dict, Optional, Any
+from typing import List, Dict, Optional, Any, Union
 
 import pytz
 from bson import ObjectId
@@ -45,6 +45,27 @@ class ResultadoDetallado(BaseModel):
 class CompetenciaCompleta(BaseModel):
     competencia: str  # Descripción general de la competencia
     resultados: List[ResultadoDetallado]  # Lista de resultados específicos
+
+
+# MODELOS LEGACY COMPATIBLES
+class ResultadoAprendizajeLegacy(BaseModel):
+    pfa_programa: Optional[str] = None
+    pfa_asignatura: Optional[str] = None
+    competencias: Optional[str] = None
+    # Campos del nuevo formato
+    competencia: Optional[str] = None
+    resultados: Optional[List[ResultadoDetallado]] = None
+
+
+class EstrategiaLegacy(BaseModel):
+    descripcion: str
+
+
+class EvaluacionLegacy(BaseModel):
+    descripcion: Optional[str] = None
+    evaluaciones: Optional[List[Dict]] = None
+    # Campos del nuevo formato
+    tipos_evaluacion: Optional[List[Dict]] = None
 
 
 class TipoEvaluacion(BaseModel):
@@ -95,11 +116,11 @@ class SyllabusModel(BaseModel):
     justificacion: Optional[str] = None
     objetivo_general: Optional[str] = None
     objetivos_especificos: Optional[List[ObjetivoEspecifico]] = None
-    resultados_aprendizaje: Optional[List[CompetenciaCompleta]] = None
+    resultados_aprendizaje: Optional[List[Dict]] = None  # Más flexible para ambos formatos
     articulacion_resultados_aprendizaje: Optional[str] = None
     contenido: Optional[Dict] = None
-    estrategias: Optional[Dict[str, bool]] = None
-    evaluacion: Optional[EvaluacionNueva] = None
+    estrategias: Optional[Union[Dict[str, bool], List[Dict]]] = None  # Más flexible
+    evaluacion: Optional[Dict] = None  # Más flexible para ambos formatos
     bibliografia: Optional[Bibliografia] = None
     seguimiento: Optional[Seguimiento] = None
     sugerencias: Optional[str] = None
@@ -109,6 +130,9 @@ class SyllabusModel(BaseModel):
     idioma_espacio_id: Optional[List] = None
     tercero_id: Optional[int] = 0
     activo: bool = Field(default=True)
+    
+    class Config:
+        extra = "allow"  # Permite campos adicionales
 
 
 class SyllabusCreationModel(SyllabusModel):
@@ -123,6 +147,129 @@ class SyllabusUpdateModel(SyllabusModel):
 class DeleteSyllabusModel(BaseModel):
     activo: Optional[bool] = Field(default=False)
     fecha_modificacion: Optional[datetime] = Field(default=local_now())
+
+
+def transform_legacy_to_new_format(syllabus_data: dict) -> dict:
+    """
+    Transforma datos del formato legacy al nuevo formato
+    """
+    transformed_data = syllabus_data.copy()
+    
+    # Transformar resultados_aprendizaje
+    if transformed_data.get("resultados_aprendizaje"):
+        new_resultados = []
+        for resultado in transformed_data["resultados_aprendizaje"]:
+            if isinstance(resultado, dict):
+                # Si tiene campos legacy, crear estructura nueva
+                if "pfa_programa" in resultado or "pfa_asignatura" in resultado or "competencias" in resultado:
+                    new_resultado = {
+                        "competencia": resultado.get("pfa_programa", ""),
+                        "resultados": [
+                            {
+                                "id": "01",
+                                "dominio": "Cognitivo - Conocer",
+                                "resultado_detallado": resultado.get("pfa_programa", "")
+                            }
+                        ]
+                    }
+                    new_resultados.append(new_resultado)
+                else:
+                    # Ya está en formato nuevo
+                    new_resultados.append(resultado)
+        transformed_data["resultados_aprendizaje"] = new_resultados
+    
+    # Transformar estrategias
+    if transformed_data.get("estrategias") and isinstance(transformed_data["estrategias"], list):
+        # Convertir lista de estrategias a diccionario
+        estrategias_dict = {}
+        for i, estrategia in enumerate(transformed_data["estrategias"]):
+            if isinstance(estrategia, dict) and "descripcion" in estrategia:
+                estrategias_dict[f"estrategia_{i+1}"] = True
+        transformed_data["estrategias"] = estrategias_dict
+    
+    # Transformar evaluacion
+    if transformed_data.get("evaluacion") and isinstance(transformed_data["evaluacion"], dict):
+        evaluacion_data = transformed_data["evaluacion"]
+        if "evaluaciones" in evaluacion_data and "tipos_evaluacion" not in evaluacion_data:
+            # Convertir evaluaciones legacy a tipos_evaluacion
+            tipos_evaluacion = []
+            for i, eval_item in enumerate(evaluacion_data.get("evaluaciones", [])):
+                if isinstance(eval_item, dict):
+                    # Manejar porcentaje que puede ser None
+                    porcentaje = eval_item.get("porcentaje")
+                    if porcentaje is None:
+                        porcentaje = 0
+                    elif isinstance(porcentaje, str):
+                        try:
+                            porcentaje = int(porcentaje)
+                        except (ValueError, TypeError):
+                            porcentaje = 0
+                    
+                    tipo_eval = {
+                        "nombre": eval_item.get("nombre", f"Evaluación {i+1}"),
+                        "tipo_evaluacion": "EF",  # Default
+                        "porcentaje": porcentaje,
+                        "trabajo_tipo": "I",  # Default individual
+                        "tipo_nota": "0-5",
+                        "resultados_aprendizaje_asociados": []
+                    }
+                    tipos_evaluacion.append(tipo_eval)
+            evaluacion_data["tipos_evaluacion"] = tipos_evaluacion
+    
+    return transformed_data
+
+
+def transform_new_to_legacy_format(syllabus_data: dict) -> dict:
+    """
+    Transforma datos del nuevo formato al formato legacy
+    """
+    transformed_data = syllabus_data.copy()
+    
+    # Transformar resultados_aprendizaje
+    if transformed_data.get("resultados_aprendizaje"):
+        legacy_resultados = []
+        for resultado in transformed_data["resultados_aprendizaje"]:
+            if isinstance(resultado, dict):
+                if "competencia" in resultado and "resultados" in resultado:
+                    # Convertir de nuevo a legacy
+                    legacy_resultado = {
+                        "pfa_programa": resultado.get("competencia", ""),
+                        "pfa_asignatura": "No aplica",
+                        "competencias": "No aplica"
+                    }
+                    legacy_resultados.append(legacy_resultado)
+                else:
+                    # Ya está en formato legacy
+                    legacy_resultados.append(resultado)
+        transformed_data["resultados_aprendizaje"] = legacy_resultados
+    
+    # Transformar estrategias
+    if transformed_data.get("estrategias") and isinstance(transformed_data["estrategias"], dict):
+        # Convertir diccionario a lista de estrategias
+        estrategias_list = []
+        for key, value in transformed_data["estrategias"].items():
+            if value:
+                estrategias_list.append({"descripcion": f"Estrategia {key}"})
+        transformed_data["estrategias"] = estrategias_list
+    
+    # Transformar evaluacion
+    if transformed_data.get("evaluacion") and isinstance(transformed_data["evaluacion"], dict):
+        evaluacion_data = transformed_data["evaluacion"]
+        if "tipos_evaluacion" in evaluacion_data and "evaluaciones" not in evaluacion_data:
+            # Convertir tipos_evaluacion a evaluaciones legacy
+            evaluaciones = []
+            for tipo_eval in evaluacion_data.get("tipos_evaluacion", []):
+                if isinstance(tipo_eval, dict):
+                    eval_item = {
+                        "nombre": tipo_eval.get("nombre", ""),
+                        "estrategia": "Evaluación",
+                        "momento": "Según cronograma",
+                        "porcentaje": tipo_eval.get("porcentaje", None)
+                    }
+                    evaluaciones.append(eval_item)
+            evaluacion_data["evaluaciones"] = evaluaciones
+    
+    return transformed_data
 
 
 def connect_db_client():
@@ -528,6 +675,10 @@ def update_syllabus(syllabus_id, syllabus_data, syllabus_collection):
         # Validación de integridad antes de actualizar
         validate_syllabus_data_integrity(syllabus_data)
         
+        # Excluir el campo _id de la actualización ya que es inmutable en MongoDB
+        if "_id" in syllabus_data:
+            del syllabus_data["_id"]
+        
         print("Updating syllabus")
         result = syllabus_collection.update_one(
             filter_,
@@ -575,6 +726,11 @@ def update_syllabus(syllabus_id, syllabus_data, syllabus_collection):
 def delete_syllabus(syllabus_id, syllabus_data, syllabus_collection):
     try:
         filter_ = {"_id": ObjectId(syllabus_id)}
+        
+        # Excluir el campo _id de la actualización ya que es inmutable en MongoDB
+        if "_id" in syllabus_data:
+            del syllabus_data["_id"]
+            
         print("Deleting syllabus")
         result = syllabus_collection.update_one(
             filter_,
@@ -706,7 +862,7 @@ def lambda_handler(event, context):
             data, error = parse_body(event)
             if error is None:
                 try:
-                    # Valida la estructura usando tu modelo actualizado
+                    # Valida la estructura usando el modelo flexible
                     syllabus_model = SyllabusCreationModel(**data)
                     print("Validación del modelo de creación exitosa")
                     
@@ -747,7 +903,7 @@ def lambda_handler(event, context):
                 try:
                     syllabus_id = event["pathParameters"]["id"]
                     
-                    # Valida la estructura para modelo actualizado
+                    # Valida la estructura usando el modelo flexible
                     syllabus_model = SyllabusUpdateModel(**data)
                     print("Validación del modelo de actualización exitosa")
                     
