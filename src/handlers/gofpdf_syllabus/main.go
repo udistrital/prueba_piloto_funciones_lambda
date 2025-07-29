@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"strings"
 
+
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/phpdave11/gofpdf"
@@ -89,7 +90,7 @@ func headerTemplate(pdf *gofpdf.Fpdf, pageStyle PageStyle) {
 	FontStyle(pdf, "B", 9, 0, "Helvetica")
 	x, y := pdf.GetXY()
 	pdf.MultiCell(pageStyle.WC*8, 7,
-		tr("\nUNIVERSIDAD DISTRITAL \nFRANCISCO JOSÉ DE CALDAS\n\nSYLLABUS"),
+		tr("\nUNIVERSIDAD DISTRITAAL \nFRANCISCO JOSÉ DE CALDAS\n\nSYLLABUS"),
 		"", "CB", false)
 	pdf.SetXY(x, y)
 	pdf.CellFormat(pageStyle.WC*8, 45, "", "LTRB", 1, "CT", false, 0, "")

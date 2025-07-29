@@ -25,7 +25,7 @@ Parameters:
     Default: ""
   CrudDB:
     Type: String
-    Default: "prueba_piloto_lambda_db"
+    Default: ""
   Timezone:
     Type: String
     Default: "America/Bogota"
@@ -37,6 +37,12 @@ Resources:
       CodeUri: src/handlers/crud_syllabus/
       Handler: app.lambda_handler
       Runtime: python3.9
+      VpcConfig:
+        SecurityGroupIds:
+          - sg-0ebc920d35b5e46a3
+        SubnetIds:
+          - subnet-2771567f
+          - subnet-43b19769
       Environment:
         Variables:
           SYLLABUS_CRUD_HOST: !Ref CrudHost

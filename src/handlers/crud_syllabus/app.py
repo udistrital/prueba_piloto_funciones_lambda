@@ -20,7 +20,6 @@ SYLLABUS_CRUD_PASS = os.environ.get('SYLLABUS_CRUD_PASS')
 SYLLABUS_CRUD_DB = os.environ.get('SYLLABUS_CRUD_DB')
 TIMEZONE = os.environ.get('TIMEZONE')
 COLLECTION = "syllabus"
-print(SYLLABUS_CRUD_DB)
 
 ORDER_LABEL = {
     "desc": DESCENDING,
