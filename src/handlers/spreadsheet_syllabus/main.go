@@ -536,6 +536,18 @@ func objectivesSection(template *excelize.File, sheetName string, style map[stri
 	}
 }
 
+func generateLineExcel(template *excelize.File, sheetName string, boldFont string, style map[string]int, message string, index *int) {
+	startCell := fmt.Sprintf("A%v", *index)
+	endCell := fmt.Sprintf("J%v", *index)
+	template.MergeCell(sheetName, startCell, endCell)
+	if boldFont == "bold" {
+		template.SetCellStyle(sheetName, startCell, endCell, style["boldLeftLRStyle"])
+	} else {
+		template.SetCellStyle(sheetName, startCell, endCell, style["simpleJustifyLRStyle"])
+	}
+	template.SetCellValue(sheetName, startCell, message)
+}
+
 func purposeSection(template *excelize.File, sheetName string, style map[string]int, data map[string]any, index *int) {
 	// --- 1. Título y Encabezados de la Tabla (Versión Corregida y Limpia) ---
 	aLabel := fmt.Sprintf("A%v", *index)
@@ -545,131 +557,175 @@ func purposeSection(template *excelize.File, sheetName string, style map[string]
 	template.SetCellValue(sheetName, aLabel, "V. PROPÓSITOS DE FORMACIÓN Y DE APRENDIZAJE (PFA) DEL ESPACIO ACADÉMICO")
 
 	*index++
-	template.SetRowHeight(sheetName, *index, 30)
 
-	// Definimos la información de los encabezados de forma clara.
-	// Clave: Columna de inicio. Valor: Título de la columna.
-	headerTitles := map[string]string{
-		"A": "Competencias",
-		"D": "Dominio-Nivel",
-		"F": "RA",
-		"G": "Resultados de Aprendizaje",
-	}
-
-	// Definimos los rangos de las columnas.
-	// Clave: Columna de inicio. Valor: Columna de fin.
-	colRanges := map[string]string{
-		"A": "C",
-		"D": "E",
-		"F": "F",
-		"G": "J",
-	}
-
-	// Iteramos de forma ordenada para asegurar que las columnas se creen de izquierda a derecha.
-	orderedCols := []string{"A", "D", "F", "G"}
-	for _, startCol := range orderedCols {
-		title := headerTitles[startCol]
-		endCol := colRanges[startCol]
-		styleName := "boldStyle" // El estilo es el mismo para todos los encabezados.
-
-		startCell := fmt.Sprintf("%s%d", startCol, *index)
-		endCell := fmt.Sprintf("%s%d", endCol, *index)
-
+	propositos, propositosOk := data["propositos"]
+	if !propositosOk || propositos == nil {
+		startCell := fmt.Sprintf("A%v", *index)
+		endCell := fmt.Sprintf("J%v", *index)
 		template.MergeCell(sheetName, startCell, endCell)
-		template.SetCellStyle(sheetName, startCell, endCell, style[styleName])
-		template.SetCellValue(sheetName, startCell, title)
+		template.SetCellStyle(sheetName, startCell, endCell, style["simpleJustifyLRStyle"])
+		template.SetCellValue(sheetName, startCell, "No hay propósitos de formación definidos")
 	}
 
-	// --- 2. Verificación y Agrupación de Datos ---
-	propositosData, ok := data["propositos"]
-	if !ok || propositosData == nil {
-		*index++
-		template.MergeCell(sheetName, fmt.Sprintf("A%v", *index), fmt.Sprintf("J%v", *index))
-		template.SetCellStyle(sheetName, fmt.Sprintf("A%v", *index), fmt.Sprintf("J%v", *index), style["simpleStyle"])
-		template.SetCellValue(sheetName, fmt.Sprintf("A%v", *index), "No hay propósitos de formación definidos.")
-		return
-	}
+	prop, _ := propositos.([]interface{})
+	p, _ := prop[0].(map[string]interface{})
+	// Verificar si están los propósitos en versión legacy
+	_, exist := p["propositos_formación_legacy"]
 
-	propositosArray, ok := propositosData.([]any)
-	if !ok {
-		// El tipo de dato no es una lista como se esperaba.
-		return
-	}
+	if exist {
+		p_data := p["propositos_formación_legacy"].([]interface{})
+		for i := 0; i < len(p_data); i += 3 {
+			generateLineExcel(template, sheetName, "bold", style, fmt.Sprintf("PROPÓSITO %v", (i+3)/3), index)
+			*index++
 
-	// Definimos la estructura para agrupar, igual que en la función del PDF.
-	type CompetenciaGroup struct {
-		nombre string
-		items  []map[string]any
-	}
-	var competenciasOrdenadas []CompetenciaGroup
-	competenciasVistas := make(map[string]bool)
+			generateLineExcel(template, sheetName, "bold", style, "PFA del Programa/Proyecto", index)
+			*index++
 
-	// Este bucle transforma la lista plana en una lista agrupada por competencia.
-	for _, prop := range propositosArray {
-		propMap := prop.(map[string]any)
-		programa := fmt.Sprintf("%v", propMap["competencia"])
-		if !competenciasVistas[programa] {
-			competenciasVistas[programa] = true
-			grupo := CompetenciaGroup{nombre: programa, items: make([]map[string]any, 0)}
-			competenciasOrdenadas = append(competenciasOrdenadas, grupo)
+			generateLineExcel(template, sheetName, "simple", style, p_data[i].(string), index)
+			*index++
+
+			generateLineExcel(template, sheetName, "bold", style, "PFA de la Asignatura", index)
+			*index++
+
+			generateLineExcel(template, sheetName, "simple", style, p_data[i+1].(string), index)
+			*index++
+
+			generateLineExcel(template, sheetName, "bold", style, "Competencias", index)
+			*index++
+
+			template.SetRowHeight(sheetName, *index, 50)
+			generateLineExcel(template, sheetName, "simple", style, p_data[i+2].(string), index)
+			*index++
 		}
-		for i := range competenciasOrdenadas {
-			if competenciasOrdenadas[i].nombre == programa {
-				competenciasOrdenadas[i].items = append(competenciasOrdenadas[i].items, propMap)
-				break
+	} else {
+		// se asumen valores en V3 válidos, en su defecto deja valores genericos
+
+		template.SetRowHeight(sheetName, *index, 30)
+
+		// Definimos la información de los encabezados de forma clara.
+		// Clave: Columna de inicio. Valor: Título de la columna.
+		headerTitles := map[string]string{
+			"A": "Competencias",
+			"D": "Dominio-Nivel",
+			"F": "RA",
+			"G": "Resultados de Aprendizaje",
+		}
+
+		// Definimos los rangos de las columnas.
+		// Clave: Columna de inicio. Valor: Columna de fin.
+		colRanges := map[string]string{
+			"A": "C",
+			"D": "E",
+			"F": "F",
+			"G": "J",
+		}
+
+		// Iteramos de forma ordenada para asegurar que las columnas se creen de izquierda a derecha.
+		orderedCols := []string{"A", "D", "F", "G"}
+		for _, startCol := range orderedCols {
+			title := headerTitles[startCol]
+			endCol := colRanges[startCol]
+			styleName := "boldStyle" // El estilo es el mismo para todos los encabezados.
+
+			startCell := fmt.Sprintf("%s%d", startCol, *index)
+			endCell := fmt.Sprintf("%s%d", endCol, *index)
+
+			template.MergeCell(sheetName, startCell, endCell)
+			template.SetCellStyle(sheetName, startCell, endCell, style[styleName])
+			template.SetCellValue(sheetName, startCell, title)
+		}
+
+		// --- 2. Verificación y Agrupación de Datos ---
+		propositosData, ok := data["propositos"]
+		if !ok || propositosData == nil {
+			*index++
+			template.MergeCell(sheetName, fmt.Sprintf("A%v", *index), fmt.Sprintf("J%v", *index))
+			template.SetCellStyle(sheetName, fmt.Sprintf("A%v", *index), fmt.Sprintf("J%v", *index), style["simpleStyle"])
+			template.SetCellValue(sheetName, fmt.Sprintf("A%v", *index), "No hay propósitos de formación definidos.")
+			return
+		}
+
+		propositosArray, ok := propositosData.([]any)
+		if !ok {
+			// El tipo de dato no es una lista como se esperaba.
+			return
+		}
+
+		// Definimos la estructura para agrupar, igual que en la función del PDF.
+		type CompetenciaGroup struct {
+			nombre string
+			items  []map[string]any
+		}
+		var competenciasOrdenadas []CompetenciaGroup
+		competenciasVistas := make(map[string]bool)
+
+		// Este bucle transforma la lista plana en una lista agrupada por competencia.
+		for _, prop := range propositosArray {
+			propMap := prop.(map[string]any)
+			programa := fmt.Sprintf("%v", propMap["competencia"])
+			if !competenciasVistas[programa] {
+				competenciasVistas[programa] = true
+				grupo := CompetenciaGroup{nombre: programa, items: make([]map[string]any, 0)}
+				competenciasOrdenadas = append(competenciasOrdenadas, grupo)
 			}
-		}
-	}
-
-	// --- 3. Renderizado de Datos Agrupados ---
-	// Si no se encontraron competencias para ordenar, no se hace nada más.
-	if len(competenciasOrdenadas) == 0 {
-		return
-	}
-
-	for _, grupo := range competenciasOrdenadas {
-		competencia := grupo.nombre
-		resultados := grupo.items
-		numResultados := len(resultados)
-
-		if numResultados > 0 {
-			filaInicialCompetencia := *index + 1
-
-			// Iteramos sobre los resultados de aprendizaje de este grupo.
-			for i, resultadoAux := range resultados {
-				*index++
-				template.SetRowHeight(sheetName, *index, 45) // Asignar una altura de fila.
-
-				// Celda de Competencia (Columnas A-C)
-				// El texto de la competencia solo se escribe en la primera fila de su grupo.
-				if i == 0 {
-					template.SetCellValue(sheetName, fmt.Sprintf("A%v", *index), competencia)
+			for i := range competenciasOrdenadas {
+				if competenciasOrdenadas[i].nombre == programa {
+					competenciasOrdenadas[i].items = append(competenciasOrdenadas[i].items, propMap)
+					break
 				}
-				// El estilo y el merge se aplican a todas las filas del grupo.
-				template.MergeCell(sheetName, fmt.Sprintf("A%v", *index), fmt.Sprintf("C%v", *index))
-				template.SetCellStyle(sheetName, fmt.Sprintf("A%v", *index), fmt.Sprintf("C%v", *index), style["simpleJustifyStyle"])
-
-				// Celda Dominio-Nivel (Columnas D-E)
-				template.MergeCell(sheetName, fmt.Sprintf("D%v", *index), fmt.Sprintf("E%v", *index))
-				template.SetCellStyle(sheetName, fmt.Sprintf("D%v", *index), fmt.Sprintf("E%v", *index), style["simpleStyle"])
-				template.SetCellValue(sheetName, fmt.Sprintf("D%v", *index), fmt.Sprintf("%v", resultadoAux["dominio"]))
-
-				// Celda RA (Columna F)
-				template.SetCellStyle(sheetName, fmt.Sprintf("F%v", *index), fmt.Sprintf("F%v", *index), style["simpleStyle"])
-				template.SetCellValue(sheetName, fmt.Sprintf("F%v", *index), fmt.Sprintf("%v", resultadoAux["id"]))
-
-				// Celda Resultados de Aprendizaje (Columnas G-J)
-				template.MergeCell(sheetName, fmt.Sprintf("G%v", *index), fmt.Sprintf("J%v", *index))
-				template.SetCellStyle(sheetName, fmt.Sprintf("G%v", *index), fmt.Sprintf("J%v", *index), style["simpleJustifyStyle"])
-				template.SetCellValue(sheetName, fmt.Sprintf("G%v", *index), fmt.Sprintf("%v", resultadoAux["resultado_detallado"]))
 			}
+		}
 
-			// Merge vertical de la celda de competencia si abarca más de una fila.
-			if numResultados > 1 {
-				filaFinalCompetencia := *index
-				template.MergeCell(sheetName,
-					fmt.Sprintf("A%v", filaInicialCompetencia),
-					fmt.Sprintf("C%v", filaFinalCompetencia))
+		// --- 3. Renderizado de Datos Agrupados ---
+		// Si no se encontraron competencias para ordenar, no se hace nada más.
+		if len(competenciasOrdenadas) == 0 {
+			return
+		}
+
+		for _, grupo := range competenciasOrdenadas {
+			competencia := grupo.nombre
+			resultados := grupo.items
+			numResultados := len(resultados)
+
+			if numResultados > 0 {
+				filaInicialCompetencia := *index + 1
+
+				// Iteramos sobre los resultados de aprendizaje de este grupo.
+				for i, resultadoAux := range resultados {
+					*index++
+					template.SetRowHeight(sheetName, *index, 45) // Asignar una altura de fila.
+
+					// Celda de Competencia (Columnas A-C)
+					// El texto de la competencia solo se escribe en la primera fila de su grupo.
+					if i == 0 {
+						template.SetCellValue(sheetName, fmt.Sprintf("A%v", *index), competencia)
+					}
+					// El estilo y el merge se aplican a todas las filas del grupo.
+					template.MergeCell(sheetName, fmt.Sprintf("A%v", *index), fmt.Sprintf("C%v", *index))
+					template.SetCellStyle(sheetName, fmt.Sprintf("A%v", *index), fmt.Sprintf("C%v", *index), style["simpleJustifyStyle"])
+
+					// Celda Dominio-Nivel (Columnas D-E)
+					template.MergeCell(sheetName, fmt.Sprintf("D%v", *index), fmt.Sprintf("E%v", *index))
+					template.SetCellStyle(sheetName, fmt.Sprintf("D%v", *index), fmt.Sprintf("E%v", *index), style["simpleStyle"])
+					template.SetCellValue(sheetName, fmt.Sprintf("D%v", *index), fmt.Sprintf("%v", resultadoAux["dominio"]))
+
+					// Celda RA (Columna F)
+					template.SetCellStyle(sheetName, fmt.Sprintf("F%v", *index), fmt.Sprintf("F%v", *index), style["simpleStyle"])
+					template.SetCellValue(sheetName, fmt.Sprintf("F%v", *index), fmt.Sprintf("%v", resultadoAux["id"]))
+
+					// Celda Resultados de Aprendizaje (Columnas G-J)
+					template.MergeCell(sheetName, fmt.Sprintf("G%v", *index), fmt.Sprintf("J%v", *index))
+					template.SetCellStyle(sheetName, fmt.Sprintf("G%v", *index), fmt.Sprintf("J%v", *index), style["simpleJustifyStyle"])
+					template.SetCellValue(sheetName, fmt.Sprintf("G%v", *index), fmt.Sprintf("%v", resultadoAux["resultado_detallado"]))
+				}
+
+				// Merge vertical de la celda de competencia si abarca más de una fila.
+				if numResultados > 1 {
+					filaFinalCompetencia := *index
+					template.MergeCell(sheetName,
+						fmt.Sprintf("A%v", filaInicialCompetencia),
+						fmt.Sprintf("C%v", filaFinalCompetencia))
+				}
 			}
 		}
 	}
@@ -762,6 +818,21 @@ func strategiesSection(template *excelize.File, sheetName string, style map[stri
 		return
 	}
 
+	// Verificar si la estructura es un Array, si lo es son estrategias legacy
+	estr_leg, estr_leg_ok := strategiesData.([]interface{})
+	if estr_leg_ok {
+		var parrafo_estrategias string
+
+		// itera sobre cada elemento del array-slice y agrega al párrago final
+		for _, item := range estr_leg {
+			parrafo_estrategias += fmt.Sprintf(" • %v \n", item)
+		}
+		*index++
+		template.SetRowHeight(sheetName, *index, 50)
+		generateLineExcel(template, sheetName, "simple", style, parrafo_estrategias, index)
+		return
+	}
+
 	strategiesMap, ok := strategiesData.(map[string]any)
 	if !ok {
 		*index++
@@ -838,6 +909,7 @@ func strategiesSection(template *excelize.File, sheetName string, style map[stri
 			template.SetCellValue(sheetName, markCell, mark)
 		}
 	}
+
 }
 
 func evaluationSection(template *excelize.File, sheetName string, style map[string]int, data map[string]any, index *int) {
@@ -860,6 +932,34 @@ func evaluationSection(template *excelize.File, sheetName string, style map[stri
 	}
 
 	evaluaciones, ok := evaluacionData.([]any)
+
+	descripcion_eval := data["evaluacion_descripcion"]
+	if descripcion_eval.(string) != "" {
+		fmt.Println("Entra IF evaluaciones en formato legacy")
+		*index++
+		generateLineExcel(template, sheetName, "bold", style, "Descripción:", index)
+		*index++
+		generateLineExcel(template, sheetName, "simple", style, descripcion_eval.(string), index)
+		*index++
+		generateLineExcel(template, sheetName, "bold", style, "Evaluaciones:", index)
+		*index++
+
+		evals := evaluacionData.([]interface{})
+		var texto_evaluaciones string
+		for _, item := range evals {
+			if value, ok := item.(map[string]interface{}); ok {
+				texto_evaluaciones += fmt.Sprintf(" - Nombre: %v\n", value["nombre"])
+				texto_evaluaciones += fmt.Sprintf("\t   · Momento: %v\n", value["momento"])
+				texto_evaluaciones += fmt.Sprintf("\t   · Estrategia: %v\n\n", value["estrategia"])
+			}
+		}
+
+		template.SetRowHeight(sheetName, *index, 70)
+		generateLineExcel(template, sheetName, "simple", style, texto_evaluaciones, index)
+
+		return
+	}
+
 	if !ok {
 		*index++
 		template.MergeCell(sheetName, fmt.Sprintf("A%v", *index), fmt.Sprintf("J%v", *index))
@@ -1101,8 +1201,12 @@ func bibliographySection(template *excelize.File, sheetName string, style map[st
 	template.SetCellStyle(sheetName, aLabel, jLabel, style["simpleJustifyLRStyle"])
 	thematicDesc, okThematicDesc := data["bibliografia_basica"]
 	if okThematicDesc && thematicDesc != nil {
+		lista_bibliografia := ""
+		for _, item := range thematicDesc.([]interface{}) {
+			lista_bibliografia += fmt.Sprintf("- %v\n", item)
+		}
 		template.SetRowHeight(sheetName, *index, 50)
-		template.SetCellValue(sheetName, aLabel, fmt.Sprintf("%v \n\n", thematicDesc))
+		template.SetCellValue(sheetName, aLabel, fmt.Sprintf("%v \n\n", lista_bibliografia))
 	} else {
 		template.SetCellValue(sheetName, aLabel, "")
 	}
@@ -1121,8 +1225,12 @@ func bibliographySection(template *excelize.File, sheetName string, style map[st
 	template.SetCellStyle(sheetName, aLabel, jLabel, style["simpleJustifyLRStyle"])
 	thematicDesc, okThematicDesc = data["bibliografia_complementaria"]
 	if okThematicDesc && thematicDesc != nil {
+		lista_bibliografia := ""
+		for _, item := range thematicDesc.([]interface{}) {
+			lista_bibliografia += fmt.Sprintf("- %v\n", item)
+		}
 		template.SetRowHeight(sheetName, *index, 50)
-		template.SetCellValue(sheetName, aLabel, fmt.Sprintf("%v \n\n", thematicDesc))
+		template.SetCellValue(sheetName, aLabel, fmt.Sprintf("%v \n\n", lista_bibliografia))
 	} else {
 		template.SetCellValue(sheetName, aLabel, "")
 	}
@@ -1141,8 +1249,12 @@ func bibliographySection(template *excelize.File, sheetName string, style map[st
 	template.SetCellStyle(sheetName, aLabel, jLabel, style["simpleJustifyLRStyle"])
 	thematicDesc, okThematicDesc = data["bibliografia_paginas"]
 	if okThematicDesc && thematicDesc != nil {
+		lista_bibliografia := ""
+		for _, item := range thematicDesc.([]interface{}) {
+			lista_bibliografia += fmt.Sprintf("- %v\n", item)
+		}
 		template.SetRowHeight(sheetName, *index, 50)
-		template.SetCellValue(sheetName, aLabel, fmt.Sprintf("%v \n\n", thematicDesc))
+		template.SetCellValue(sheetName, aLabel, fmt.Sprintf("%v \n\n", lista_bibliografia))
 	} else {
 		template.SetCellValue(sheetName, aLabel, "")
 	}
