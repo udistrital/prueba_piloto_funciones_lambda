@@ -87,6 +87,7 @@ Resources:
     Properties:
       CodeUri: src/handlers/gofpdf_syllabus/
       Handler: gofpdf_syllabus
+      MemorySize: 160
       Runtime: go1.x
       Architectures:
         - x86_64
