@@ -3,16 +3,15 @@ package main
 import (
 	"bufio"
 	"bytes"
+
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"strings"
+
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/phpdave11/gofpdf"
-	"math"
-	"reflect"
-	"strings"
-	"unicode/utf8"
 )
 
 type PageStyle struct {
@@ -90,89 +89,10 @@ func headerTemplate(pdf *gofpdf.Fpdf, pageStyle PageStyle) {
 	FontStyle(pdf, "B", 9, 0, "Helvetica")
 	x, y := pdf.GetXY()
 	pdf.MultiCell(pageStyle.WC*8, 7,
-		tr("\nUNIVERSIDAD DISTRITAL \nFRANCISCO JOSÉ DE CALDAS\n\nSYLLABUS"),
+		tr("\nUNIVERSIDAD DISTRITAAL \nFRANCISCO JOSÉ DE CALDAS\n\nSYLLABUS"),
 		"", "CB", false)
 	pdf.SetXY(x, y)
 	pdf.CellFormat(pageStyle.WC*8, 45, "", "LTRB", 1, "CT", false, 0, "")
-}
-
-func calculatePurposeHeight(text string) float64 {
-	paragraphs := strings.Split(text, "\n")
-	totalHeight := 0.0
-	for _, paragraph := range paragraphs {
-		numCharacter := utf8.RuneCountInString(paragraph)
-		lines := math.Ceil(float64(numCharacter) / 95.0)
-		totalHeight += lines * 4.5
-	}
-	return totalHeight
-}
-
-func purposesSectionOpt2(pdf *gofpdf.Fpdf, pageStyle PageStyle, data map[string]any) {
-	tr := pdf.UnicodeTranslatorFromDescriptor("")
-	purposes, purposesOk := data["propositos"]
-	if purposesOk && purposes != nil {
-		if reflect.TypeOf(purposes).Kind() == reflect.Slice || reflect.TypeOf(purposes).Kind() == reflect.Array {
-			pdf.SetFillColor(255, 255, 255)
-			for iP, purpose := range purposes.([]any) {
-				purposeAux := purpose.(map[string]any)
-				FontStyle(pdf, "B", 9, 0, "Helvetica")
-				pdf.MultiCell(pageStyle.WC*10, 4.5,
-					tr(fmt.Sprintf("\nPROPÓSITO %v\n\n", iP+1)),
-					"LR", "J", false)
-
-				pdf.CellFormat(pageStyle.WC*10, 6, tr("PFA del programa/proyecto"),
-					"LR", 1, "LM", true, 0, "")
-				FontStyle(pdf, "", 9, 0, "Helvetica")
-				pfaPrograma, okPfaPrograma := purposeAux["pfa_programa"]
-				if okPfaPrograma && pfaPrograma != nil {
-					pdf.MultiCell(pageStyle.WC*10, 4.5,
-						tr(fmt.Sprintf("%v\n\n", pfaPrograma)),
-						"LR", "J", false)
-				} else {
-					pdf.CellFormat(pageStyle.WC*10, 6, "", "LR", 1, "LM", false, 0, "")
-				}
-
-				FontStyle(pdf, "B", 9, 0, "Helvetica")
-				pdf.CellFormat(pageStyle.WC*10, 6, tr("PFA de la asignatura"),
-					"LR", 1, "LM", true, 0, "")
-				FontStyle(pdf, "", 9, 0, "Helvetica")
-				pfaAsignatura, okPfaAsignatura := purposeAux["pfa_asignatura"]
-				if okPfaAsignatura && pfaAsignatura != nil {
-					pdf.MultiCell(pageStyle.WC*10, 4.5,
-						tr(fmt.Sprintf("%v\n\n", pfaAsignatura)),
-						"LR", "J", false)
-				} else {
-					pdf.CellFormat(pageStyle.WC*10, 6, "", "LR", 1, "LM", false, 0, "")
-				}
-
-				FontStyle(pdf, "B", 9, 0, "Helvetica")
-				pdf.CellFormat(pageStyle.WC*10, 6, tr("Competencias"),
-					"LR", 1, "LM", true, 0, "")
-				FontStyle(pdf, "", 9, 0, "Helvetica")
-				competencias, okCompetencias := purposeAux["competencias"]
-				if okCompetencias && competencias != nil {
-					pdf.MultiCell(pageStyle.WC*10, 4.5,
-						tr(fmt.Sprintf("%v\n\n", competencias)),
-						"LBR", "J", false)
-				} else {
-					pdf.CellFormat(pageStyle.WC*10, 6, "", "LBR", 1, "LM", false, 0, "")
-				}
-
-			}
-			pdf.SetFillColor(
-				pageStyle.BaseColorRGB[0],
-				pageStyle.BaseColorRGB[1],
-				pageStyle.BaseColorRGB[2])
-		} else if reflect.TypeOf(purposes).Kind() == reflect.String {
-			pdf.MultiCell(pageStyle.WC*10, 4.5, tr(fmt.Sprintf("%v\n", purposes)),
-				"LBR", "J", false)
-		} else {
-			pdf.CellFormat(pageStyle.WC*10, 6, "", "LBR", 1, "LM", false, 0, "")
-		}
-	} else {
-		pdf.CellFormat(pageStyle.WC*10, 6, "", "LBR", 1, "LM", false, 0, "")
-	}
-
 }
 
 func natureAcademicSpace(pdf *gofpdf.Fpdf, pageStyle PageStyle, data map[string]any) {
@@ -514,14 +434,182 @@ func objectivesSection(pdf *gofpdf.Fpdf, pageStyle PageStyle, data map[string]an
 		pageStyle.BaseColorRGB[2])
 }
 
+func maxFloat(vals ...float64) float64 {
+	max := 0.0
+	for _, v := range vals {
+		if v > max {
+			max = v
+		}
+	}
+	return max
+}
+
+// Dibuja los encabezados de la tabla.
+func drawHeaders(pdf *gofpdf.Fpdf, tr func(string) string, colCompetencias, colDominio, colRA, colResultados float64) {
+	FontStyle(pdf, "B", 8, 0, "Helvetica") // Usando tu helper FontStyle
+	pdf.SetFillColor(201, 201, 201)        // Color gris como en tu getPageStyle
+	pdf.CellFormat(colCompetencias, 8, tr("Competencias"), "LTRB", 0, "CM", true, 0, "")
+	pdf.CellFormat(colDominio, 8, tr("Dominio-Nivel"), "TRB", 0, "CM", true, 0, "")
+	pdf.CellFormat(colRA, 8, tr("RA"), "TRB", 0, "CM", true, 0, "")
+	pdf.CellFormat(colResultados, 8, tr("Resultados de Aprendizaje"), "TRB", 1, "CM", true, 0, "")
+}
+
 func purposeSection(pdf *gofpdf.Fpdf, pageStyle PageStyle, data map[string]any) {
-	// PROPÓSITOS
 	tr := pdf.UnicodeTranslatorFromDescriptor("")
 	FontStyle(pdf, "B", 9, 0, "Helvetica")
-	pdf.CellFormat(pageStyle.WC*10, 6,
+	pdf.SetFillColor(pageStyle.BaseColorRGB[0], pageStyle.BaseColorRGB[1], pageStyle.BaseColorRGB[2])
+	pdf.CellFormat(pageStyle.WW, 6, // Usando pageStyle.WW para el ancho total
 		tr("V. PROPÓSITOS DE FORMACIÓN Y DE APRENDIZAJE (PFA) DEL ESPACIO ACADÉMICO"),
 		"LRB", 1, "CM", true, 0, "")
-	purposesSectionOpt2(pdf, pageStyle, data)
+
+	propositos, propositosOk := data["propositos"]
+	if !propositosOk || propositos == nil {
+		FontStyle(pdf, "", 9, 0, "Helvetica")
+		pdf.CellFormat(pageStyle.WW, 6, tr("No hay propósitos de formación definidos"),
+			"LBR", 1, "CM", false, 0, "")
+		return
+	}
+
+	prop, _ := propositos.([]interface{})
+	p, _ := prop[0].(map[string]interface{})
+	// Verificar si están los propósitos en versión legacy
+	_, exist := p["propositos_formación_legacy"]
+	if exist {
+		p_data := p["propositos_formación_legacy"].([]interface{})
+		for i := 0; i < len(p_data); i += 3 {
+			FontStyle(pdf, "B", 9, 0, "Helvetica")
+			pdf.CellFormat(pageStyle.WC*10, 6, tr(fmt.Sprintf("  PROPÓSITO %v\n", (i+3)/3)), "LR", 1, "LM", false, 0, "")
+
+			pdf.CellFormat(pageStyle.WC*10, 6, tr("PFA del Programa/Proyecto"), "LR", 1, "LM", false, 0, "")
+			// pdf.MultiCell(pageStyle.WC*10, 4.5, tr("PFA del Programa\n"), "LBR", "J", false)
+			FontStyle(pdf, "", 9, 0, "Helvetica")
+			pdf.MultiCell(pageStyle.WC*10, 4.5, tr(fmt.Sprintf("%v\n", p_data[i].(string))), "LR", "J", false)
+
+			FontStyle(pdf, "B", 9, 0, "Helvetica")
+			pdf.CellFormat(pageStyle.WC*10, 6, tr("PFA de la Asignatura"), "LR", 1, "LM", false, 0, "")
+			// pdf.MultiCell(pageStyle.WC*10, 4.5, tr("PFA de la Asignatura\n"), "LBR", "J", false)
+			FontStyle(pdf, "", 9, 0, "Helvetica")
+			pdf.MultiCell(pageStyle.WC*10, 4.5, tr(fmt.Sprintf("%v\n", p_data[i+1].(string))), "LR", "J", false)
+
+			FontStyle(pdf, "B", 9, 0, "Helvetica")
+			pdf.CellFormat(pageStyle.WC*10, 6, tr("Competencias"), "LR", 1, "LM", false, 0, "")
+			// pdf.MultiCell(pageStyle.WC*10, 4.5, tr("Competencias\n"), "LBR", "J", false)
+			FontStyle(pdf, "", 9, 0, "Helvetica")
+			pdf.MultiCell(pageStyle.WC*10, 4.5, tr(fmt.Sprintf("%v\n \n", p_data[i+2].(string))), "LBR", "J", false)
+		}
+
+	} else {
+		// sino se asume que llegan propositos de aprendizaje V3, genericos o reales
+		// Anchos de columna basados en tu PageStyle.WW
+		colCompetencias := pageStyle.WW * 0.3 // 30%
+		colDominio := pageStyle.WW * 0.2      // 20%
+		colRA := pageStyle.WW * 0.1           // 10%
+		colResultados := pageStyle.WW * 0.4   // 40%
+
+		drawHeaders(pdf, tr, colCompetencias, colDominio, colRA, colResultados)
+
+		propositosArray := propositos.([]any)
+		type CompetenciaGroup struct {
+			nombre string
+			items  []map[string]any
+		}
+		var competenciasOrdenadas []CompetenciaGroup
+		competenciasVistas := make(map[string]bool)
+		for _, prop := range propositosArray {
+			propMap := prop.(map[string]any)
+			programa := fmt.Sprintf("%v", propMap["competencia"])
+			if !competenciasVistas[programa] {
+				competenciasVistas[programa] = true
+				grupo := CompetenciaGroup{nombre: programa, items: make([]map[string]any, 0)}
+				competenciasOrdenadas = append(competenciasOrdenadas, grupo)
+			}
+			for i := range competenciasOrdenadas {
+				if competenciasOrdenadas[i].nombre == programa {
+					competenciasOrdenadas[i].items = append(competenciasOrdenadas[i].items, propMap)
+					break
+				}
+			}
+		}
+
+		// Altura de línea base para cálculos.
+		const lineHeight = 4.5
+		_, pageH := pdf.GetPageSize()
+
+		for _, grupo := range competenciasOrdenadas {
+			competenciaText := grupo.nombre
+
+			// 1. Pre-calcular la altura de cada fila para este grupo
+			var rowsHeights []float64
+			var totalHeightForGroup float64
+			for _, resultado := range grupo.items {
+				dominioStr := fmt.Sprintf("%v", resultado["dominio"])
+				detalleStr := fmt.Sprintf("%v", resultado["resultado_detallado"])
+				FontStyle(pdf, "", 7, 0, "Helvetica")
+				linesDominio := pdf.SplitLines([]byte(tr(dominioStr)), colDominio-2) // -2 para un pequeño margen interno
+				linesResultados := pdf.SplitLines([]byte(tr(detalleStr)), colResultados-2)
+
+				// La altura de la fila es la máxima de las celdas de esa fila
+				// La celda de Competencia no se incluye aquí porque su altura total es la suma de todas las filas.
+				rowHeight := maxFloat(float64(len(linesDominio))*lineHeight, float64(len(linesResultados))*lineHeight, 10)
+				rowsHeights = append(rowsHeights, rowHeight)
+				totalHeightForGroup += rowHeight
+			}
+
+			// 2. Verificar si el bloque completo cabe en la página
+			if pdf.GetY()+totalHeightForGroup > (pageH - pageStyle.MB) {
+				pdf.AddPage()
+				drawHeaders(pdf, tr, colCompetencias, colDominio, colRA, colResultados)
+			}
+
+			// 3. Dibujar el bloque
+			startY := pdf.GetY()
+			startX := pdf.GetX()
+
+			// Dibujar la celda de competencia "fusionada"
+			FontStyle(pdf, "B", 7, 0, "Helvetica")
+			pdf.Rect(startX, startY, colCompetencias, totalHeightForGroup, "D")
+
+			// Calcular posición para centrar el texto verticalmente en la celda grande
+			linesCompetencia := pdf.SplitLines([]byte(tr(competenciaText)), colCompetencias-2)
+			textHeight := float64(len(linesCompetencia)) * lineHeight
+			yText := startY + (totalHeightForGroup-textHeight)/2
+			pdf.SetXY(startX+1, yText) // +1 para margen
+			pdf.MultiCell(colCompetencias-2, lineHeight, tr(competenciaText), "", "LM", false)
+
+			// Restaurar posición para dibujar las celdas de la derecha
+			pdf.SetXY(startX+colCompetencias, startY)
+
+			for i, resultado := range grupo.items {
+				rowHeight := rowsHeights[i]
+				currentX, currentY := pdf.GetX(), pdf.GetY()
+
+				dominioStr := fmt.Sprintf("%v", resultado["dominio"])
+				raStr := fmt.Sprintf("%v", resultado["id"])
+				detalleStr := fmt.Sprintf("%v", resultado["resultado_detallado"])
+
+				FontStyle(pdf, "", 7, 0, "Helvetica")
+
+				// Dibujar borde y contenido para cada celda
+				pdf.Rect(currentX, currentY, colDominio, rowHeight, "D")
+				pdf.SetXY(currentX+1, currentY+1)
+				pdf.MultiCell(colDominio-2, lineHeight, tr(dominioStr), "", "CM", false)
+
+				pdf.SetXY(currentX+colDominio, currentY)
+				pdf.Rect(currentX+colDominio, currentY, colRA, rowHeight, "D")
+				pdf.SetXY(currentX+colDominio+1, currentY+1)
+				pdf.MultiCell(colRA-2, lineHeight, tr(raStr), "", "CM", false)
+
+				pdf.SetXY(currentX+colDominio+colRA, currentY)
+				pdf.Rect(currentX+colDominio+colRA, currentY, colResultados, rowHeight, "D")
+				pdf.SetXY(currentX+colDominio+colRA+1, currentY+1)
+				pdf.MultiCell(colResultados-2, lineHeight, tr(detalleStr), "", "LM", false)
+
+				pdf.SetXY(startX+colCompetencias, currentY+rowHeight)
+			}
+
+			pdf.SetY(startY + totalHeightForGroup)
+		}
+	}
 }
 
 func thematicContentSection(pdf *gofpdf.Fpdf, pageStyle PageStyle, data map[string]any) {
@@ -577,87 +665,310 @@ func thematicContentSection(pdf *gofpdf.Fpdf, pageStyle PageStyle, data map[stri
 }
 
 func strategiesSection(pdf *gofpdf.Fpdf, pageStyle PageStyle, data map[string]any) {
-	// ESTRATEGIAS DE ENSEÑANZA QUE FAVORECEN EL APRENDIZAJE
 	tr := pdf.UnicodeTranslatorFromDescriptor("")
 	FontStyle(pdf, "B", 9, 0, "Helvetica")
 	pdf.CellFormat(pageStyle.WC*10, 6,
 		tr("VII. ESTRATEGIAS DE ENSEÑANZA QUE FAVORECEN EL APRENDIZAJE"),
 		"LRB", 1, "CM", true, 0, "")
-	FontStyle(pdf, "", 9, 0, "Helvetica")
 	strategies, okStrategies := data["estrategias_ensenanza"]
-	if okStrategies && strategies != nil {
-		strategiesStr := "\n"
-		for _, strategy := range strategies.([]any) {
-			strategyAux := strategy.(map[string]any)
-			strategyDes, strategyDesOk := strategyAux["descripcion"]
-			if strategyDesOk && strategyDes != nil {
-				strategiesStr += fmt.Sprintf("• %v \n", strategyDes)
-			}
+
+	// Verificar si la estructura es un Array, si lo es son estrategias legacy
+	estr_leg, estr_leg_ok := strategies.([]interface{})
+	if estr_leg_ok {
+		var parrafo_estrategias string
+
+		pdf.SetFillColor(255, 255, 255)
+		FontStyle(pdf, "", 9, 0, "Helvetica")
+
+		// itera sobre cada elemento del array-slice y agrega al párrago final
+		for _, item := range estr_leg {
+			parrafo_estrategias += fmt.Sprintf(" • %v \n", item)
 		}
-		pdf.MultiCell(pageStyle.WC*10, 4.5, tr(fmt.Sprintf("%v \n", strategiesStr)),
-			"LR", "J", false)
+		pdf.MultiCell(pageStyle.WC*10, 4.5, tr(fmt.Sprintf("%v\n", parrafo_estrategias)), "LBR", "J", false)
+
+	} else if okStrategies && strategies != nil {
+		strategiesMap := strategies.(map[string]any)
+		FontStyle(pdf, "", 8, 0, "Helvetica")
+
+		// Ancho de cada columna (3 columnas)
+		colWidth := pageStyle.WC * 10 / 3
+
+		// Organizar estrategias en 3x3
+		strategyGrid := [][]struct {
+			key   string
+			label string
+		}{
+			// PRIMERA FILA
+			{
+				{"tradicional", "Tradicional"},
+				{"basado_proyectos", "Basado en Proyectos"},
+				{"basado_tecnologia", "Basado en Tecnología"},
+			},
+			// SEGUNDA FILA
+			{
+				{"basado_problemas", "Basado en Problemas"},
+				{"colaborativo", "Colaborativo"},
+				{"basado_experiencias", "Basado en Experiencias"},
+			},
+			// TERCERA FILA
+			{
+				{"aprendizaje_activo", "Aprendizaje Activo"},
+				{"autodirigido", "Autodirigido"},
+				{"centrado_estudiante", "Centrado en el estudiante"},
+			},
+		}
+
+		for _, row := range strategyGrid {
+			for _, strategy := range row {
+				mark := ""
+				if value, exists := strategiesMap[strategy.key]; exists && value == true {
+					mark = "X"
+				}
+
+				// Celda con nombre de estrategia (80% del ancho)
+				pdf.CellFormat(colWidth*0.8, 9, tr(strategy.label),
+					"LTB", 0, "CM", false, 0, "")
+
+				// Celda con marca X (20% del ancho)
+				pdf.CellFormat(colWidth*0.2, 9, tr(mark),
+					"LTRB", 0, "CM", false, 0, "")
+			}
+			pdf.Ln(-1) // Nueva línea después de cada fila
+		}
+
 	} else {
-		pdf.CellFormat(pageStyle.WC*10, 6, "", "LR", 1, "LM", false, 0, "")
+		FontStyle(pdf, "", 9, 0, "Helvetica")
+		pdf.CellFormat(pageStyle.WC*10, 6, tr("No hay estrategias definidas"),
+			"LBR", 1, "CM", false, 0, "")
 	}
 }
 
-func evaluationSection(pdf *gofpdf.Fpdf, pageStyle PageStyle, data map[string]any) {
-	// EVALUACIÓN
-	tr := pdf.UnicodeTranslatorFromDescriptor("")
-	FontStyle(pdf, "B", 9, 0, "Helvetica")
-	pdf.CellFormat(pageStyle.WC*10, 6, tr("VIII. EVALUACIÓN"), "LRB", 1, "CM", true, 0, "")
-	pdf.SetFillColor(255, 255, 255)
-	FontStyle(pdf, "B", 9, 0, "Helvetica")
-	pdf.CellFormat(pageStyle.WC*10, 6, tr("Descripción:"), "LR", 1, "LM", true, 0, "")
-	FontStyle(pdf, "", 9, 0, "Helvetica")
-	evaluationDesc, okEvaluationDesc := data["evaluacion_descripcion"]
-	if okEvaluationDesc && evaluationDesc != nil {
-		pdf.MultiCell(pageStyle.WC*10, 4.5, tr(fmt.Sprintf("%v \n\n", evaluationDesc)),
-			"LR", "J", false)
-	} else {
-		pdf.CellFormat(pageStyle.WC*10, 6, "", "LR", 1, "LM", false, 0, "")
+func drawEvaluationHeaders(pdf *gofpdf.Fpdf, tr func(string) string, colRA float64, colWidths []float64, evaluaciones []map[string]any) {
+	FontStyle(pdf, "B", 7, 0, "Helvetica")
+
+	startX, startY := pdf.GetXY()
+
+	alturaFilaSuperior := 8.0 // Altura de la primera fila de encabezados
+	alturaFilaInferior := 8.0 // Altura de la segunda fila de encabezados
+	alturaTotal := alturaFilaSuperior + alturaFilaInferior
+
+	// ===== PRIMERA COLUMNA: RA (ocupa ambas filas) =====
+	pdf.Rect(startX, startY, colRA, alturaTotal, "D")
+
+	// Centrar el texto verticalmente en la celda grande
+	pdf.SetXY(startX+1, startY+alturaTotal/2-2) // Ajustar posición vertical
+	pdf.MultiCell(colRA-2, 4, tr("Resultados de aprendizaje (RA) a ser evaluados"), "", "CM", false)
+
+	// ===== SEGUNDA PARTE: Encabezados de evaluaciones =====
+
+	// FILA SUPERIOR: "Resultados de aprendizaje asociados..."
+	pdf.SetXY(startX+colRA, startY)
+	totalWidthEvals := 0.0
+	for _, width := range colWidths {
+		totalWidthEvals += width
 	}
 
-	FontStyle(pdf, "B", 9, 0, "Helvetica")
-	pdf.CellFormat(pageStyle.WC*10, 6, tr("Evaluaciones:"), "LR", 1, "LM", true, 0, "")
-	FontStyle(pdf, "", 9, 0, "Helvetica")
-	evalDetails, okEvalDetails := data["evaluacion_detalle"]
-	if okEvalDetails && evalDetails != nil {
-		strategiesStr := ""
-		for _, topic := range evalDetails.([]any) {
-			topicAux := topic.(map[string]any)
-			evalName, evalNameOk := topicAux["nombre"]
-			if !evalNameOk || evalName == nil {
-				strategiesStr += fmt.Sprintf("  • Nombre:\n")
-			} else {
-				strategiesStr += fmt.Sprintf("  • Nombre: %v \n", evalName)
-			}
+	pdf.Rect(startX+colRA, startY, totalWidthEvals, alturaFilaSuperior, "D")
+	pdf.SetXY(startX+colRA+1, startY+1)
+	pdf.MultiCell(totalWidthEvals-2, 3, tr("Resultados de aprendizaje asociados a las evaluaciones\n(T: Teórico / P: Práctico)"), "", "CM", false)
 
-			evalStra, evalStraOk := topicAux["estrategia"]
-			if evalStraOk && evalStra != nil {
-				strategiesStr += fmt.Sprintf("      - Estrategia: %v \n", evalStra)
-			}
+	// FILA INFERIOR: Nombres específicos de evaluaciones
+	currentX := startX + colRA
+	currentY := startY + alturaFilaSuperior
 
-			moment, momentOk := topicAux["momento"]
-			if momentOk && moment != nil {
-				strategiesStr += fmt.Sprintf("      - Momento: %v \n", moment)
-			}
+	for i, eval := range evaluaciones {
+		nombre := fmt.Sprintf("%v", eval["nombre"])
 
-			percentage, percentageOk := topicAux["porcentaje"]
-			if percentageOk && percentage != nil {
-				strategiesStr += fmt.Sprintf("      - Porcentaje: %v \n", percentage)
+		// Simplificar nombres largos
+		if len(nombre) > 12 {
+			palabras := strings.Fields(nombre)
+			if len(palabras) > 0 {
+				nombre = palabras[0]
 			}
 		}
-		pdf.MultiCell(pageStyle.WC*10, 4.5, tr(fmt.Sprintf("%v\n", strategiesStr)),
-			"LBR", "J", false)
-	} else {
-		pdf.CellFormat(pageStyle.WC*10, 6, "", "LR", 1, "LM", false, 0, "")
+
+		pdf.Rect(currentX, currentY, colWidths[i], alturaFilaInferior, "D")
+		pdf.SetXY(currentX+1, currentY+2)
+		pdf.CellFormat(colWidths[i]-2, alturaFilaInferior-4, tr(nombre), "", 0, "CM", false, 0, "")
+
+		currentX += colWidths[i]
 	}
 
-	pdf.SetFillColor(
-		pageStyle.BaseColorRGB[0],
-		pageStyle.BaseColorRGB[1],
-		pageStyle.BaseColorRGB[2])
+	pdf.SetXY(startX, startY+alturaTotal)
+}
+
+func evaluationSection(pdf *gofpdf.Fpdf, pageStyle PageStyle, data map[string]any) {
+	tr := pdf.UnicodeTranslatorFromDescriptor("")
+	FontStyle(pdf, "B", 9, 0, "Helvetica")
+	pdf.SetFillColor(pageStyle.BaseColorRGB[0], pageStyle.BaseColorRGB[1], pageStyle.BaseColorRGB[2])
+	pdf.CellFormat(pageStyle.WW, 6, tr("VIII. EVALUACIÓN"), "LRB", 1, "CM", true, 0, "")
+
+	// Obtener datos de evaluación
+	evaluacionDet := data["evaluacion_detalle"]
+	if evaluacionDet == nil {
+		FontStyle(pdf, "", 9, 0, "Helvetica")
+		pdf.CellFormat(pageStyle.WW, 6, tr("No hay detalles de evaluación definidos"), "LBR", 1, "CM", false, 0, "")
+		return
+	}
+
+	evaluaciones := evaluacionDet.([]any)
+
+	descripcion_eval := data["evaluacion_descripcion"]
+	if descripcion_eval.(string) != "" {
+		FontStyle(pdf, "B", 9, 0, "Helvetica")
+		pdf.CellFormat(pageStyle.WC*10, 6, tr(" Descripción: "), "LR", 1, "LM", false, 0, "")
+		FontStyle(pdf, "", 9, 0, "Helvetica")
+		pdf.MultiCell(pageStyle.WC*10, 4.5, tr(fmt.Sprintf("%v\n", descripcion_eval)), "LR", "J", false)
+
+		FontStyle(pdf, "B", 9, 0, "Helvetica")
+		pdf.CellFormat(pageStyle.WC*10, 6, tr("Evaluaciones: "), "LR", 1, "LM", false, 0, "")
+		FontStyle(pdf, "", 9, 0, "Helvetica")
+
+		evals := evaluacionDet.([]interface{})
+		var texto_evaluaciones string
+		for _, item := range evals {
+			// // Totalmente automático, pero se genera sin orden, queda comentado por si sirve a futuro
+			// pdf.MultiCell(pageStyle.WC*10, 4.5, tr("\t"), "LR", "J", false)
+			// for key, value := range item.(map[string]interface{}) {
+			// 	// pdf.MultiCell(pageStyle.WC*10, 4.5, tr(fmt.Sprintf("- %v: %v\n", key, value)), "LR", "J", false)
+			// 	texto_evaluaciones += fmt.Sprintf(" %v: %v\n", key, value)
+			// }
+
+			if value, ok := item.(map[string]interface{}); ok {
+				texto_evaluaciones += fmt.Sprintf(" - Nombre: %v\n", value["nombre"])
+				texto_evaluaciones += fmt.Sprintf("\t   · Momento: %v\n", value["momento"])
+				texto_evaluaciones += fmt.Sprintf("\t   · Estrategia: %v\n\n", value["estrategia"])
+			}
+		}
+		pdf.MultiCell(pageStyle.WC*10, 4.5, tr(texto_evaluaciones), "LR", "J", false)
+
+	} else {
+		numEvaluaciones := len(evaluaciones)
+
+		// Configurar anchos de columnas
+		colRA := pageStyle.WW * 0.25          // 25% para columna de RAs
+		remainingWidth := pageStyle.WW * 0.75 // 75% para las evaluaciones
+		colEvalWidth := remainingWidth / float64(numEvaluaciones)
+
+		// Array de anchos para cada columna de evaluación
+		colWidths := make([]float64, numEvaluaciones)
+		for i := range colWidths {
+			colWidths[i] = colEvalWidth
+		}
+
+		// Convertir evaluaciones a slice de maps
+		evaluacionesMaps := make([]map[string]any, 0)
+		for _, eval := range evaluaciones {
+			evaluacionesMaps = append(evaluacionesMaps, eval.(map[string]any))
+		}
+
+		// Obtener todos los RAs únicos y ordenarlos
+		rasSet := make(map[string]bool)
+		for _, eval := range evaluacionesMaps {
+			if rasAsociados, ok := eval["resultados_aprendizaje_asociados"]; ok && rasAsociados != nil {
+				for _, ra := range rasAsociados.([]any) {
+					rasSet[fmt.Sprintf("%v", ra)] = true
+				}
+			}
+		}
+
+		// Convertir a slice ordenado (01, 02, 03, etc.)
+		ras := make([]string, 0)
+		for i := 1; i <= 9; i++ {
+			raStr := fmt.Sprintf("%02d", i)
+			if rasSet[raStr] {
+				ras = append(ras, raStr)
+			}
+		}
+
+		_, pageH := pdf.GetPageSize()
+		const lineHeight = 4.5
+
+		// Dibujar encabezados
+		drawEvaluationHeaders(pdf, tr, colRA, colWidths, evaluacionesMaps)
+
+		// Calcular altura total de la tabla
+		numFilas := len(ras) + 4                          // RAs + 4 filas de metadatos
+		alturaTabla := float64(numFilas) * lineHeight * 2 // Estimación generosa
+
+		// Verificar si cabe en la página
+		if pdf.GetY()+alturaTabla > (pageH - pageStyle.MB) {
+			pdf.AddPage()
+			drawEvaluationHeaders(pdf, tr, colRA, colWidths, evaluacionesMaps)
+		}
+
+		// Filas de RAs
+		for _, ra := range ras {
+			currentY := pdf.GetY()
+
+			// Verificar si necesitamos nueva página
+			if currentY+lineHeight*2 > (pageH - pageStyle.MB) {
+				pdf.AddPage()
+				drawEvaluationHeaders(pdf, tr, colRA, colWidths, evaluacionesMaps)
+			}
+
+			FontStyle(pdf, "", 8, 0, "Helvetica")
+			alturaCelda := lineHeight * 2
+
+			// Columna de RA
+			pdf.CellFormat(colRA, alturaCelda, tr(fmt.Sprintf("RA%s", ra)), "LRB", 0, "CM", false, 0, "")
+
+			// Columnas de evaluaciones - marcar con X si el RA está asociado
+			for i, eval := range evaluacionesMaps {
+				marca := ""
+				if rasAsociados, ok := eval["resultados_aprendizaje_asociados"]; ok && rasAsociados != nil {
+					for _, raAsociado := range rasAsociados.([]any) {
+						if fmt.Sprintf("%v", raAsociado) == ra {
+							marca = "X"
+							break
+						}
+					}
+				}
+				pdf.CellFormat(colWidths[i], alturaCelda, tr(marca), "RB", 0, "CM", false, 0, "")
+			}
+			pdf.Ln(-1)
+		}
+
+		// Filas de metadatos
+		metadatos := []struct {
+			nombre string
+			campo  string
+		}{
+			{"Tipo de evaluación", "tipo_evaluacion"},
+			{"Porcentaje de evaluación (%)", "porcentaje"},
+			{"Trabajo Individual(I) o Grupal(G)", "trabajo_tipo"},
+			{"Tipo de nota", "tipo_nota"},
+		}
+
+		for _, meta := range metadatos {
+			currentY := pdf.GetY()
+
+			// Verificar si necesitamos nueva página
+			if currentY+lineHeight*2 > (pageH - pageStyle.MB) {
+				pdf.AddPage()
+				drawEvaluationHeaders(pdf, tr, colRA, colWidths, evaluacionesMaps)
+			}
+
+			FontStyle(pdf, "B", 8, 0, "Helvetica")
+			alturaCelda := lineHeight * 2
+
+			// Columna de metadato
+			pdf.CellFormat(colRA, alturaCelda, tr(meta.nombre), "LRB", 0, "LM", false, 0, "")
+
+			// Valores para cada evaluación
+			FontStyle(pdf, "", 8, 0, "Helvetica")
+			for i, eval := range evaluacionesMaps {
+				valor := ""
+				if val, ok := eval[meta.campo]; ok && val != nil {
+					valor = fmt.Sprintf("%v", val)
+				}
+				pdf.CellFormat(colWidths[i], alturaCelda, tr(valor), "RB", 0, "CM", false, 0, "")
+			}
+			pdf.Ln(-1)
+		}
+	}
+	// Espacio final
+	pdf.CellFormat(pageStyle.WW, 2, "", "LBR", 1, "CM", false, 0, "")
 }
 
 func resourcesSection(pdf *gofpdf.Fpdf, pageStyle PageStyle, data map[string]any) {
@@ -707,7 +1018,11 @@ func bibliographySection(pdf *gofpdf.Fpdf, pageStyle PageStyle, data map[string]
 	FontStyle(pdf, "", 9, 0, "Helvetica")
 	thematicDesc, okThematicDesc := data["bibliografia_basica"]
 	if okThematicDesc && thematicDesc != nil {
-		pdf.MultiCell(pageStyle.WC*10, 4.5, tr(fmt.Sprintf("%v \n\n", thematicDesc)),
+		lista_bibliografia := ""
+		for _, item := range thematicDesc.([]interface{}) {
+			lista_bibliografia += fmt.Sprintf("- %v\n", item)
+		}
+		pdf.MultiCell(pageStyle.WC*10, 4.5, tr(fmt.Sprintf("%v \n\n", lista_bibliografia)),
 			"LR", "J", false)
 	} else {
 		pdf.CellFormat(pageStyle.WC*10, 6, "", "LR", 1, "LM", false, 0, "")
@@ -718,7 +1033,11 @@ func bibliographySection(pdf *gofpdf.Fpdf, pageStyle PageStyle, data map[string]
 	FontStyle(pdf, "", 9, 0, "Helvetica")
 	thematicDesc, okThematicDesc = data["bibliografia_complementaria"]
 	if okThematicDesc && thematicDesc != nil {
-		pdf.MultiCell(pageStyle.WC*10, 4.5, tr(fmt.Sprintf("%v \n\n", thematicDesc)),
+		lista_bibliografia := ""
+		for _, item := range thematicDesc.([]interface{}) {
+			lista_bibliografia += fmt.Sprintf("- %v\n", item)
+		}
+		pdf.MultiCell(pageStyle.WC*10, 4.5, tr(fmt.Sprintf("%v \n\n", lista_bibliografia)),
 			"LR", "J", false)
 	} else {
 		pdf.CellFormat(pageStyle.WC*10, 6, "", "LR", 1, "LM", false, 0, "")
@@ -729,7 +1048,11 @@ func bibliographySection(pdf *gofpdf.Fpdf, pageStyle PageStyle, data map[string]
 	FontStyle(pdf, "", 9, 0, "Helvetica")
 	thematicDesc, okThematicDesc = data["bibliografia_paginas"]
 	if okThematicDesc && thematicDesc != nil {
-		pdf.MultiCell(pageStyle.WC*10, 4.5, tr(fmt.Sprintf("%v \n\n", thematicDesc)),
+		lista_bibliografia := ""
+		for _, item := range thematicDesc.([]interface{}) {
+			lista_bibliografia += fmt.Sprintf("- %v\n", item)
+		}
+		pdf.MultiCell(pageStyle.WC*10, 4.5, tr(fmt.Sprintf("%v \n\n", lista_bibliografia)),
 			"LR", "J", false)
 	} else {
 		pdf.CellFormat(pageStyle.WC*10, 6, "", "LR", 1, "LM", false, 0, "")
@@ -755,7 +1078,7 @@ func trackingSection(pdf *gofpdf.Fpdf, pageStyle PageStyle, data map[string]any)
 	if !dateRevOk || dateRev == nil {
 		dateRev = ""
 	}
-	pdf.CellFormat((pageStyle.WC*3)-2, 6, tr(fmt.Sprintf("%v", dateRev)),
+	pdf.CellFormat((pageStyle.WC*2)-2, 6, tr(fmt.Sprintf("%v", dateRev)),
 		"BR", 0, "CM", false, 0, "")
 
 	pdf.CellFormat(pageStyle.WC*2, 6, tr("Versión Syllabus:"), "LBR", 0, "LM", false, 0, "")
@@ -763,7 +1086,7 @@ func trackingSection(pdf *gofpdf.Fpdf, pageStyle PageStyle, data map[string]any)
 	if !versionSyllOk || versionSyll == nil {
 		versionSyll = ""
 	}
-	pdf.CellFormat(pageStyle.WC*2, 6, tr(fmt.Sprintf("%v", versionSyll)),
+	pdf.CellFormat(pageStyle.WC*3, 6, tr(fmt.Sprintf("%v", versionSyll)),
 		"BR", 1, "CM", false, 0, "")
 
 	pdf.CellFormat((pageStyle.WC*3)+2, 6, tr("Fecha aprobación por Consejo Curricular:"),
@@ -772,7 +1095,7 @@ func trackingSection(pdf *gofpdf.Fpdf, pageStyle PageStyle, data map[string]any)
 	if !dateAprovOk || dateAprov == nil {
 		dateAprov = ""
 	}
-	pdf.CellFormat((pageStyle.WC*3)-2, 6, tr(fmt.Sprintf("%v", dateAprov)),
+	pdf.CellFormat((pageStyle.WC*2)-2, 6, tr(fmt.Sprintf("%v", dateAprov)),
 		"BR", 0, "CM", false, 0, "")
 
 	pdf.CellFormat(pageStyle.WC*2, 6, tr("Número de acta:"), "LBR", 0, "LM", false, 0, "")
@@ -780,8 +1103,8 @@ func trackingSection(pdf *gofpdf.Fpdf, pageStyle PageStyle, data map[string]any)
 	if !numActOk || numAct == nil {
 		numAct = ""
 	}
-	pdf.CellFormat(pageStyle.WC*2, 6, tr(fmt.Sprintf("%v", numAct)),
-		"BR", 1, "CM", false, 0, "")
+	// pdf.CellFormat(pageStyle.WC*3, 6, tr(fmt.Sprintf("%v", numAct)), "BR", 1, "CM", false, 0, "")
+	pdf.MultiCell(pageStyle.WC*3, 6, tr(fmt.Sprintf("%v", numAct)), "LBR", "C", false)
 
 	pdf.CellFormat(pageStyle.WC*3, 6, tr("Documento versión: 12 julio 2023"),
 		"", 0, "LM", false, 0, "")
